@@ -1,0 +1,9 @@
+project:
+  output-dir: _docs
+
+website:
+  title: "lr-video-face"
+  site-url: "https://AndreaMacarulla.github.io/lr-video-face"
+  description: "Likelihood Ratio estimation for face recognition in image-to-video scenarios."
+  repo-branch: main
+  repo-url: "https://github.com/AndreaMacarulla/lr-video-face"
