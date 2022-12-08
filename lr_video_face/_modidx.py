@@ -5,4 +5,5 @@ d = { 'settings': { 'branch': 'main',
                 'doc_host': 'https://AndreaMacarulla.github.io',
                 'git_url': 'https://github.com/AndreaMacarulla/lr-video-face',
                 'lib_path': 'lr_video_face'},
-  'syms': {'lr_video_face.core': {'lr_video_face.core.foo': ('core.html#foo', 'lr_video_face/core.py')}}}
+  'syms': { 'lr_video_face.core': { 'lr_video_face.core.foo': ('core.html#foo', 'lr_video_face/core.py'),
+                                    'lr_video_face.core.foo2': ('core.html#foo2', 'lr_video_face/core.py')}}}
