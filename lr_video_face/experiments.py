@@ -88,7 +88,6 @@ class Experiment:
 
         # Create folder
         self.create_output_dir()
-        session = self.session
 
         # Get test pairs per category.
         test_pairs_per_category = get_test_pairs_per_category(self.session, 
@@ -99,7 +98,13 @@ class Experiment:
                                                             self.enfsi_years)
         # Get calibration pair per category.
         calibration_pairs_per_category = get_calibration_pairs_per_category(test_pairs_per_category.keys(),
-                                                                                 session)
+                                                                            self.filters, 
+                                                                            self.face_image_filters,
+                                                                            self.detector,
+                                                                            self.embeddingModel,
+                                                                            self.calibration_db,
+                                                                            self.n_calibration_pairs,
+                                                                            self.session)
         '''
         # todo: move later.
         pairs_df = pd.DataFrame(columns=['Image 1', 'Image 2'])
