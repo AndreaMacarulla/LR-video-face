@@ -58,4 +58,6 @@ d = { 'settings': { 'branch': 'main',
                                    'lr_video_face.orm.ScorerModel': ('orm.html#scorermodel', 'lr_video_face/orm.py'),
                                    'lr_video_face.orm.ScorerModel.__init__': ('orm.html#scorermodel.__init__', 'lr_video_face/orm.py'),
                                    'lr_video_face.orm.ScorerModel.predict_proba': ( 'orm.html#scorermodel.predict_proba',
-                                                                                    'lr_video_face/orm.py')}}}
+                                                                                    'lr_video_face/orm.py')},
+            'lr_video_face.pairing': { 'lr_video_face.pairing.get_test_pairs_per_category': ( 'pairing.html#get_test_pairs_per_category',
+                                                                                              'lr_video_face/pairing.py')}}}
