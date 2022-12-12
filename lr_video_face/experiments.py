@@ -7,6 +7,8 @@ __all__ = ['Experiment']
 from sklearn.base import BaseEstimator
 from typing import List, Dict, Tuple
 
+from datetime import datetime
+
 # %% ../nbs/01_experiments.ipynb 5
 class Experiment:
 

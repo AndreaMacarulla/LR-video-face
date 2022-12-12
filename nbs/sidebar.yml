@@ -1,0 +1,8 @@
+website:
+  sidebar:
+    contents:
+      - index.ipynb
+      - 00_core.ipynb
+      - 01_experiments.ipynb
+      - 02_pairing.ipynb
+      - 03_calibration.ipynb
