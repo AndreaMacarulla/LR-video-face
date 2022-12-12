@@ -25,7 +25,9 @@ from lir import (LogitCalibrator,
 from sql_face.tables import EnfsiImage, EnfsiPair
 from lr_video_face.orm import ScorerModel
 from lr_video_face.pairing import get_test_pairs_per_category
-from lr_video_face.calibration import get_calibration_pairs_per_category
+from lr_video_face.calibration import (get_calibration_pairs_per_category, 
+                                        generate_lr_systems,
+                                        predict_lr)
 
 # %% ../nbs/02_experiments.ipynb 5
 class Experiment:
@@ -105,23 +107,25 @@ class Experiment:
                                                                             self.calibration_db,
                                                                             self.n_calibration_pairs,
                                                                             self.session)
-        '''
-        # todo: move later.
-        pairs_df = pd.DataFrame(columns=['Image 1', 'Image 2'])
-        for category, pairs in calibration_pairs_per_category.items():
-            print(category, len(pairs))
-            for pair in pairs:
-                pairs_df = pairs_df.append({'Image 1': pair.first.croppedImages.images.path, 'Image 2': pair.second.croppedImages.images.path}, ignore_index=True)
-
-        pairs_df.to_excel(f'cal_pairs_{self.filters}_{self.face_image_filters}.xlsx')
-        '''
 
         # Generate lr_system per category.
-        lr_systems, test_pairs_per_category = self.generate_lr_systems(calibration_pairs_per_category,
-                                                                       test_pairs_per_category, session)
+        lr_systems, test_pairs_per_category = generate_lr_systems(self.embeddingModel,
+                                                                        self.embedding_model_as_scorer,
+                                                                        self.metrics,
+                                                                        self.scorer,
+                                                                        self.calibrator,
+                                                                        calibration_pairs_per_category, 
+                                                                        test_pairs_per_category, 
+                                                                        self.session)
 
         # Predict LR
-        results = self.predict_lr(lr_systems, test_pairs_per_category, session)
+        results = predict_lr(self.enfsi_years,
+                                self.embeddingModel,
+                                self.embedding_model_as_scorer,
+                                self.metrics,
+                                lr_systems, 
+                                test_pairs_per_category, 
+                                self.session)
 
         # todo: make necessary variables for graphs.
         return results
