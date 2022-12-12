@@ -24,6 +24,7 @@ from lir import (LogitCalibrator,
 
 from sql_face.tables import EnfsiImage, EnfsiPair
 from lr_video_face.orm import ScorerModel
+from lr_video_face.pairing import get_test_pairs_per_category
 
 # %% ../nbs/02_experiments.ipynb 5
 class Experiment:
@@ -89,7 +90,7 @@ class Experiment:
         session = self.session
 
         # Get test pairs per category.
-        test_pairs_per_category = self.get_test_pairs_per_category(session)
+        test_pairs_per_category = get_test_pairs_per_category(self.session, self.filters, self.face_image_filters, self.detector, self.embeddingModel)
         # Get calibration pair per category.
         calibration_pairs_per_category = self.get_calibration_pairs_per_category(test_pairs_per_category.keys(),
                                                                                  session)
