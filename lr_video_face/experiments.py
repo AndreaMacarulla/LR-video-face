@@ -86,7 +86,7 @@ class Experiment:
 
         # Create folder
         self.create_output_dir()
-        session = connect_db()
+        session = self.session
 
         # Get test pairs per category.
         test_pairs_per_category = self.get_test_pairs_per_category(session)

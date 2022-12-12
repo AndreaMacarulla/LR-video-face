@@ -8,7 +8,7 @@ from typing import List
 
 from sql_face.tables import FaceImage
 
-# %% ../nbs/01_orm.ipynb 5
+# %% ../nbs/01_orm.ipynb 4
 class FacePair:
     def __init__(self,
     first:FaceImage,
@@ -47,7 +47,7 @@ class FacePair:
 
         return np.linalg.norm(norm_emb_1 - norm_emb_2) / 2
 
-# %% ../nbs/01_orm.ipynb 6
+# %% ../nbs/01_orm.ipynb 5
 class ScorerModel:
     def __init__(self,
     embeddingModel:str,
