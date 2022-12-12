@@ -5,9 +5,12 @@ __all__ = ['Experiment', 'ExperimentalSetup']
 
 # %% ../nbs/01_experiments.ipynb 3
 import os
+import lir
+import numpy as np
 
 from sklearn.base import BaseEstimator
-from typing import List, Dict, Tuple
+from typing import List, Iterator, Dict, Union, Tuple
+from collections import defaultdict
 
 from datetime import datetime
 
@@ -18,6 +21,9 @@ from lir import (LogitCalibrator,
                  FractionCalibrator,
                  IsotonicCalibrator,
                  DummyCalibrator, Xy_to_Xn)
+
+from sql_face.tables import EnfsiImage, EnfsiPair
+from lr_video_face.calibration import ScorerModel
 
 # %% ../nbs/01_experiments.ipynb 5
 class Experiment:
@@ -35,7 +41,9 @@ class Experiment:
         n_calibration_pairs: int,
         embedding_model_as_scorer: bool,
         root_output_dir: str
-        ):
+        ):     
+    
+    
 
         self.detector = detector
         self.embeddingModel = embeddingModel
@@ -49,10 +57,10 @@ class Experiment:
         self.n_calibration_pairs = n_calibration_pairs
         self.embedding_model_as_scorer = embedding_model_as_scorer
         self.root_output_dir = root_output_dir
-        self.output_dir = get_output_dir()
+        self.output_dir = self._get_output_dir()
 
 
-    def get_output_dir(self):
+    def _get_output_dir(self):
         if isinstance(self.calibrator, IsotonicCalibrator):
             calibrator = 'Isotonic Calibrator'
         else:
@@ -152,7 +160,6 @@ class ExperimentalSetup:
 
         self.detectors = detectors
         self.embeddingModels = embeddingModels
-        # self.calibrator_names = calibrator_names
         self.calibrators = self._get_calibrators(calibrator_names)
         self.calibration_db = calibration_db
         self.enfsi_years = enfsi_years
@@ -163,8 +170,9 @@ class ExperimentalSetup:
         self.embedding_model_as_scorer = embedding_model_as_scorer
         self.session = session
         self.name = datetime.now().strftime("%Y-%m-%d %H %M %S")
-        # self.results_folder = results_folder
         self.output_dir= self._make_output_dir(results_folder)
+        self.experiments = self.prepare_experiments()
+        self.cllr_expert_per_year = self._get_cllr_expert_per_year()
 
 
     @staticmethod
@@ -205,47 +213,77 @@ class ExperimentalSetup:
     # def __post_init__(self):
     #     self.calibrators = self._get_calibrators(self.calibrator_names)
     #     self.output_dir: str = self.make_output_dir()
-    #     self.experiments: List[Experiment] = self.prepare_experiments()
+    #     
+
+     
+    def _get_cllr_expert_per_year(self):
+        session = self.session
+        expert_eval = session.query(EnfsiImage.year, EnfsiPair.same, EnfsiPair.ExpertsLLR) \
+            .filter(EnfsiImage.image_id == EnfsiPair.second_id,
+                    EnfsiImage.year.in_(self.enfsi_years)) \
+            .all()        
+
+        y_test_per_year = defaultdict(list)
+        LLR_experts_per_year = defaultdict(list)
+
+        for year, y, LLR_expert in expert_eval:
+            y_test_per_year[year].append(y)
+            LLR_experts_per_year[year].append(LLR_expert)
+
+        cllr_experts_per_year = defaultdict(list)
+
+        for year in self.enfsi_years:
+            LLR_experts = np.asarray(LLR_experts_per_year[year])
+            for i, expert in enumerate(LLR_experts.T):
+                # todo: overflow bug with np.power(10, expert) for year 2017.
+                LR_expert = np.asarray([np.power(10, i) for i in expert])
+                cllr_expert = lir.metrics.cllr(LR_expert,
+                                               np.asarray(y_test_per_year[year]))
+                cllr_experts_per_year[year].append(cllr_expert)
+
+        return cllr_experts_per_year
 
     
 
 
-    # def prepare_experiments(self) -> List[Experiment]:
-    #     """
-    #     Returns a list of all experiments that fall under this setup.
+    def prepare_experiments(self) -> List[Experiment]:
+        """
+        Returns a list of all experiments that fall under this setup.
 
-    #     :return: List[Experiment]
-    #     """
-    #     experiments = []
-    #     for detector in self.detectors:
-    #         for embeddingModel in self.embeddingModels:
-    #             for calibrator in self.calibrators:
-    #                 if self.embedding_model_as_scorer:
-    #                     scorer = ScorerModel(metric=self.metrics, embeddingModel=embeddingModel)
-    #                 else:
-    #                     scorer = LogisticRegression(solver='lbfgs')
-    #                 experiments.append(Experiment(
-    #                     detector,
-    #                     embeddingModel,
-    #                     scorer,
-    #                     calibrator,
-    #                     self.calibration_db,
-    #                     self.enfsi_years,
-    #                     self.filters,
-    #                     self.face_image_filters,
-    #                     self.metrics,
-    #                     self.n_calibration_pairs,
-    #                     self.embedding_model_as_scorer,
-    #                     self.output_dir
-    #                 ))
+        :return: List[Experiment]
+        """
+        experiments = []
+        for detector in self.detectors:
+            for embeddingModel in self.embeddingModels:
+                for calibrator in self.calibrators:
+                    if self.embedding_model_as_scorer:
+                        scorer = ScorerModel(metric=self.metrics, embeddingModel=embeddingModel)
+                    else:
+                        scorer = LogisticRegression(solver='lbfgs')
+                    experiments.append(Experiment(
+                        detector,
+                        embeddingModel,
+                        scorer,
+                        calibrator,
+                        self.calibration_db,
+                        self.enfsi_years,
+                        self.filters,
+                        self.face_image_filters,
+                        self.metrics,
+                        self.n_calibration_pairs,
+                        self.embedding_model_as_scorer,
+                        self.output_dir
+                    ))
 
-    #     return experiments
+        return experiments
 
-    # def __iter__(self) -> Iterator[Experiment]:
-    #     return iter(self.experiments)
+    def __iter__(self) -> Iterator[Experiment]:
+        return iter(self.experiments)
 
-    # def __len__(self) -> int:
-    #     return len(self.experiments)
+    def __len__(self) -> int:
+        return len(self.experiments)
+
+   
 
    
 
@@ -266,35 +304,4 @@ class ExperimentalSetup:
 
    
 
-    # @property
-    # def cllr_expert_per_year(self):
-    #     session = connect_db()
-    #     expert_eval = session.query(EnfsiImage.year, EnfsiPair.same, EnfsiPair.ExpertsLLR) \
-    #         .filter(EnfsiImage.image_id == EnfsiPair.second_id,
-    #                 EnfsiImage.year.in_(self.enfsi_years)) \
-    #         .all()
-    #     # years = [pair.first.year for pair in self.results["original_test_pairs"]]
-    #     #y_test = [pair.same for pair in self.results["original_test_pairs"]]
-    #     #LLR_experts = [pair.ExpertsLLR for pair in self.results["original_test_pairs"]]
-
-    #     # data_per_year = zip(years, y_test, LLR_experts)
-
-    #     y_test_per_year = defaultdict(list)
-    #     LLR_experts_per_year = defaultdict(list)
-
-    #     for year, y, LLR_expert in expert_eval:
-    #         y_test_per_year[year].append(y)
-    #         LLR_experts_per_year[year].append(LLR_expert)
-
-    #     cllr_experts_per_year = defaultdict(list)
-
-    #     for year in self.enfsi_years:
-    #         LLR_experts = np.asarray(LLR_experts_per_year[year])
-    #         for i, expert in enumerate(LLR_experts.T):
-    #             # todo: overflow bug with np.power(10, expert) for year 2017.
-    #             LR_expert = np.asarray([np.power(10, i) for i in expert])
-    #             cllr_expert = lir.metrics.cllr(LR_expert,
-    #                                            np.asarray(y_test_per_year[year]))
-    #             cllr_experts_per_year[year].append(cllr_expert)
-
-    #     return cllr_experts_per_year
+    
