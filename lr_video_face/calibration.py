@@ -197,7 +197,7 @@ def predict_lr(enfsi_years,
         lrs_predicted = {}
         for category, row_test_pairs in test_pairs_per_category.items():
 
-            pairs = [FacePair(row_test_pair[1], row_test_pair[2], row_test_pair[0].same_identity) 
+            pairs = [FacePair(row_test_pair[1], row_test_pair[2], row_test_pair[0].same) 
                         for row_test_pair in row_test_pairs]
 
             test_pairs = [row_test_pair[0] for row_test_pair in row_test_pairs]
