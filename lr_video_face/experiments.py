@@ -9,6 +9,7 @@ import lir
 import numpy as np
 
 from sklearn.base import BaseEstimator
+from sklearn.linear_model import LogisticRegression
 from typing import List, Iterator, Dict, Union, Tuple
 from collections import defaultdict
 
@@ -22,7 +23,7 @@ from lir import (LogitCalibrator,
                  IsotonicCalibrator,
                  DummyCalibrator, Xy_to_Xn)
 
-from sql_face.tables import EnfsiImage, EnfsiPair
+from sql_face.tables import *
 from lr_video_face.orm import ScorerModel
 from lr_video_face.pairing import get_test_pairs_per_category
 from lr_video_face.calibration import (get_calibration_pairs_per_category, 
@@ -39,7 +40,7 @@ class Experiment:
         calibrator: BaseEstimator,
         calibration_db: List[str],
         enfsi_years: List[int],
-        filters: List[str],
+        image_filters: List[str],
         face_image_filters: List[str],
         metrics: str,
         n_calibration_pairs: int,
@@ -55,7 +56,7 @@ class Experiment:
         self.calibrator = calibrator
         self.calibration_db = calibration_db
         self.enfsi_years = enfsi_years
-        self.filters = filters
+        self.image_filters = image_filters
         self.face_image_filters = face_image_filters
         self.metrics = metrics
         self.n_calibration_pairs = n_calibration_pairs
@@ -93,14 +94,14 @@ class Experiment:
 
         # Get test pairs per category.
         test_pairs_per_category = get_test_pairs_per_category(self.session, 
-                                                            self.filters, 
+                                                            self.image_filters, 
                                                             self.face_image_filters, 
                                                             self.detector, 
                                                             self.embeddingModel,
                                                             self.enfsi_years)
         # Get calibration pair per category.
         calibration_pairs_per_category = get_calibration_pairs_per_category(test_pairs_per_category.keys(),
-                                                                            self.filters, 
+                                                                            self.image_filters, 
                                                                             self.face_image_filters,
                                                                             self.detector,
                                                                             self.embeddingModel,
@@ -165,7 +166,7 @@ class ExperimentalSetup:
                 calibrator_names, 
                 calibration_db, 
                 enfsi_years, 
-                filters, 
+                image_filters, 
                 face_image_filters,
                 metrics, 
                 n_calibration_pairs, 
@@ -180,7 +181,7 @@ class ExperimentalSetup:
         self.calibrators = self._get_calibrators(calibrator_names)
         self.calibration_db = calibration_db
         self.enfsi_years = enfsi_years
-        self.filters = filters
+        self.image_filters = image_filters
         self.face_image_filters = face_image_filters
         self.metrics = metrics
         self.n_calibration_pairs = n_calibration_pairs
@@ -214,10 +215,9 @@ class ExperimentalSetup:
 
     
     def _get_directory(self):
-        filters = self.filters + self.face_image_filters
+        filters = self.image_filters + self.face_image_filters
         subfolder = f'[{",".join(filters)}]'
-        folder = f'C_({self.n_calibration_pairs})_[{",".join(self.calibration_db)}]_T_[\
-                {",".join([str(year) for year in self.enfsi_years])}]'
+        folder = f'C_({self.n_calibration_pairs})_[{",".join(self.calibration_db)}]_T_[{",".join([str(year) for year in self.enfsi_years])}]'
         return os.path.join(folder, subfolder)
 
     def _make_output_dir(self, results_folder):
@@ -227,10 +227,6 @@ class ExperimentalSetup:
             os.makedirs(results_folder)
         return output_dir
 
-    # def __post_init__(self):
-    #     self.calibrators = self._get_calibrators(self.calibrator_names)
-    #     self.output_dir: str = self.make_output_dir()
-    #     
 
      
     def _get_cllr_expert_per_year(self):
@@ -284,7 +280,7 @@ class ExperimentalSetup:
                         calibrator,
                         self.calibration_db,
                         self.enfsi_years,
-                        self.filters,
+                        self.image_filters,
                         self.face_image_filters,
                         self.metrics,
                         self.n_calibration_pairs,
@@ -299,27 +295,4 @@ class ExperimentalSetup:
         return iter(self.experiments)
 
     def __len__(self) -> int:
-        return len(self.experiments)
-
-   
-
-   
-
-    
-
-    # def count_detected_faces(self, output_dir):
-    #     session = connect_db()
-    #     all_faces = (session.query(EnfsiImage.year, Detector.name, CroppedImage.face_detected, func.count("*")) \
-    #                  .join(EnfsiImage)
-    #                  .join(Detector)
-    #                  .filter(EnfsiImage.year.in_(self.enfsi_years))
-    #                  .group_by(EnfsiImage.year, Detector.name, CroppedImage.face_detected)
-    #                  .all()
-    #                  )
-    #     detected_faces_df = pd.DataFrame.from_records(all_faces)
-    #     detected_faces_df.to_excel(os.path.join(output_dir, f'detected_faces.xlsx'))
-    #     session.close()
-
-   
-
-    
+        return len(self.experiments)    

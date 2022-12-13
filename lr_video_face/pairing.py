@@ -21,8 +21,6 @@ def get_test_pairs(enfsi_years, session):
 
 # %% ../nbs/03_pairing.ipynb 6
 def get_valid_test_pairs(session, 
-                        filters,
-                        face_image_filters,
                         detector,
                         embeddingModel,
                         enfsi_years) -> Tuple[EnfsiPair, FaceImage, FaceImage]:
@@ -71,28 +69,24 @@ def get_valid_test_pairs(session,
 
 # %% ../nbs/03_pairing.ipynb 7
 def get_test_pairs_per_category(session,
-                                filters,
+                                image_filters,
                                 face_image_filters,
                                 detector,
                                 embeddingModel,
                                 enfsi_years):
         
-        valid_test_pairs = get_valid_test_pairs(session,
-                                                filters,
-                                                face_image_filters,
-                                                detector,
-                                                embeddingModel,
-                                                enfsi_years)
-        
+    valid_test_pairs = get_valid_test_pairs(session,
+                                            detector,
+                                            embeddingModel,
+                                            enfsi_years)
+    
 
-        test_categories = [
-            row[0].get_category(filters, face_image_filters, detector, embeddingModel)
-            for row in valid_test_pairs]
+    test_categories = [
+        row[0].get_category(image_filters, face_image_filters, detector, embeddingModel)
+        for row in valid_test_pairs]
 
-        test_pairs_per_category = defaultdict(list)
-        # for face_pair, category in zip(valid_test_pairs, test_categories):
-        #    test_pairs_per_category[category].append(face_pair)
+    test_pairs_per_category = defaultdict(list)
 
-        for row_enfsi_pair, category in zip(valid_test_pairs, test_categories):
-            test_pairs_per_category[category].append(row_enfsi_pair)
-        return test_pairs_per_category
+    for row_enfsi_pair, category in zip(valid_test_pairs, test_categories):
+        test_pairs_per_category[category].append(row_enfsi_pair)
+    return test_pairs_per_category

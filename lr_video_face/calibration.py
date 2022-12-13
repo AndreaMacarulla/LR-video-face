@@ -5,12 +5,16 @@ __all__ = ['make_cal_face_pairs', 'get_filtered_images', 'get_calibration_pairs_
            'predict_lr']
 
 # %% ../nbs/04_calibration.ipynb 3
+import numpy as np
+
 from typing import List, Union
 from collections import defaultdict
+from itertools import combinations, product, islice
+from lir import CalibratedScorer
 
 
 
-from sql_face.tables import FaceImage
+from sql_face.tables import *
 from lr_video_face.orm import FacePair
 from lr_video_face.pairing import get_test_pairs
 
@@ -42,7 +46,7 @@ def make_cal_face_pairs(first_list_of_face_images: List[Union[FaceImage, str]],
     return all_cal_face_pairs_same_identity + all_cal_face_pairs_dif_identity
 
 # %% ../nbs/04_calibration.ipynb 6
-def get_filtered_images(filters, 
+def get_filtered_images(image_filters, 
                         face_image_filters,
                         filter_values: tuple,
                         detector,
@@ -51,8 +55,8 @@ def get_filtered_images(filters,
                         session):
 
 
-    im_filter_values = filter_values[:len(filters)]
-    fi_filter_values = filter_values[len(filters):]
+    im_filter_values = filter_values[:len(image_filters)]
+    fi_filter_values = filter_values[len(image_filters):]
     assert len(fi_filter_values) == len(face_image_filters)
 
     query = session.query(FaceImage, Image.identity, Image.image_id)
@@ -67,15 +71,14 @@ def get_filtered_images(filters,
         .filter(Image.source.in_(calibration_db))
     for cal_filter, value in zip(face_image_filters, fi_filter_values):
         filter_query = filter_query.filter(FaceImage.__dict__[cal_filter] == value)
-    for cal_filter, value in zip(filters, im_filter_values):
+    for cal_filter, value in zip(image_filters, im_filter_values):
         filter_query = filter_query.filter(Image.__dict__[cal_filter] == value)
     return filter_query.all()
 
 # %% ../nbs/04_calibration.ipynb 7
 def get_calibration_pairs_per_category(categories,
-                                        filters, 
+                                        image_filters, 
                                         face_image_filters,
-                                        filter_values: tuple,
                                         detector,
                                         embeddingModel,
                                         calibration_db,
@@ -88,7 +91,7 @@ def get_calibration_pairs_per_category(categories,
 
     for pair_category in categories:
 
-        first_image_category = get_filtered_images(filters, 
+        first_image_category = get_filtered_images(image_filters, 
                                                     face_image_filters,
                                                     pair_category[0],
                                                     detector,
@@ -111,10 +114,10 @@ def get_calibration_pairs_per_category(categories,
                 )
             else:
                 all_calibration_pairs = make_cal_face_pairs(first_list_of_face_images=first_image_category,
-                                                            number_of_pairs=self.n_calibration_pairs)
+                                                            number_of_pairs=n_calibration_pairs)
 
         else:
-            second_image_category = get_filtered_images(filters, 
+            second_image_category = get_filtered_images(image_filters, 
                                                     face_image_filters,
                                                     pair_category[1],
                                                     detector,
