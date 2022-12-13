@@ -4,7 +4,10 @@
 __all__ = ['FacePair', 'ScorerModel']
 
 # %% ../nbs/01_orm.ipynb 3
+import numpy as np
 from typing import List
+
+from deepface.commons import distance as dst
 
 from sql_face.tables import FaceImage
 
@@ -18,7 +21,7 @@ class FacePair:
         self.first = first
         self.second = second
         self.same_identity = same_identity
-        self.norm_distance = compute_norm_distance()
+        self.norm_distance = self.compute_norm_distance()
 
     def distance(self, metric):
         img1_representation = np.asarray(self.first.embeddings)
@@ -60,6 +63,8 @@ class ScorerModel:
         distances = [pair.norm_distance for pair in pairs]
         distances = np.reshape(np.asarray(distances), (-1, 1))
         # norm_dist = (distances - np.min(distances)) / (np.max(distances) - np.min(distances))
+        
         p = np.concatenate((distances, 1 - distances), axis=1)
+        
 
         return p
