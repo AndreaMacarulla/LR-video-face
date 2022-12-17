@@ -40,8 +40,9 @@ class Experiment:
         calibrator: BaseEstimator,
         calibration_db: List[str],
         enfsi_years: List[int],
-        image_filters: List[str],
+        image_filters: List[str],        
         face_image_filters: List[str],
+        quality_filters: List[str],
         metrics: str,
         n_calibration_pairs: int,
         embedding_model_as_scorer: bool,
@@ -58,6 +59,7 @@ class Experiment:
         self.enfsi_years = enfsi_years
         self.image_filters = image_filters
         self.face_image_filters = face_image_filters
+        self.quality_filters = quality_filters
         self.metrics = metrics
         self.n_calibration_pairs = n_calibration_pairs
         self.embedding_model_as_scorer = embedding_model_as_scorer
@@ -96,6 +98,7 @@ class Experiment:
         test_pairs_per_category = get_test_pairs_per_category(self.session, 
                                                             self.image_filters, 
                                                             self.face_image_filters, 
+                                                            self.quality_filters,
                                                             self.detector, 
                                                             self.embeddingModel,
                                                             self.enfsi_years)
@@ -103,6 +106,7 @@ class Experiment:
         calibration_pairs_per_category = get_calibration_pairs_per_category(test_pairs_per_category.keys(),
                                                                             self.image_filters, 
                                                                             self.face_image_filters,
+                                                                            self.quality_filters,
                                                                             self.detector,
                                                                             self.embeddingModel,
                                                                             self.calibration_db,
@@ -168,6 +172,7 @@ class ExperimentalSetup:
                 enfsi_years, 
                 image_filters, 
                 face_image_filters,
+                quality_filters,
                 metrics, 
                 n_calibration_pairs, 
                 embedding_model_as_scorer,
@@ -183,6 +188,7 @@ class ExperimentalSetup:
         self.enfsi_years = enfsi_years
         self.image_filters = image_filters
         self.face_image_filters = face_image_filters
+        self.quality_filters = quality_filters 
         self.metrics = metrics
         self.n_calibration_pairs = n_calibration_pairs
         self.embedding_model_as_scorer = embedding_model_as_scorer
@@ -282,6 +288,7 @@ class ExperimentalSetup:
                         self.enfsi_years,
                         self.image_filters,
                         self.face_image_filters,
+                        self.quality_filters,
                         self.metrics,
                         self.n_calibration_pairs,
                         self.embedding_model_as_scorer,
