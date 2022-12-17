@@ -12,14 +12,11 @@ import pandas as pd
 import seaborn as sns
 from matplotlib import pyplot as plt
 
-from lir import Xy_to_Xn, IsotonicCalibrator
-from lir.ece import plot
-
-
 from tqdm import tqdm
 from collections import defaultdict
 
 from lr_video_face.experiments import Experiment, ExperimentalSetup
+from lr_video_face.plots import *
 
 
 
@@ -41,412 +38,13 @@ class ExperimentEvaluator:
     
 
     def make_plots(self):
-        # self.plot_cllr_quality_2015()
-        # self.plot_cllr_quality_2015_v2()
-        # self.plot_lr_distributions()
-        # self.plot_ROC_curve()
-        # self.plot_performance_as_function_of_yaw()
-        # self.plot_performance_as_function_of_categories()
-        # self.plot_tippett()
-        self.plot_ece()
-        self.plot_cllr()
-        # todo: fix test plotting.
-        # self.test_plotting()
+        plot_lr_distributions(self.results, self.experiment_directory, self.save_plots)
+        plot_ROC_curve(self.results, self.experiment_directory, self.save_plots)
+        plot_tippett(self.results, self.experiment_directory, self.save_plots)
+        plot_ece(self.results, self.experiment_directory, self.save_plots)
+        plot_cllr(self.results, self.experiment_directory, self.experiemtn.enfsi_years, self.cllr_expert_per_year, self.experiment.embeddingModel, self.save_plots)
 
-    def plot_lr_distributions(self, show=None):
-        """
-        Plots the 10log LRs generated for the two hypotheses by the fitted system.
-        """
-        predicted_log_lrs = np.log10(self.results["lrs_predicted"])
-        plt.figure(figsize=(10, 10), dpi=100)
-        points0, points1 = Xy_to_Xn(predicted_log_lrs, np.array(self.results['y_test']))
-        plt.hist(points0, bins=20, alpha=.25, density=True)
-        plt.hist(points1, bins=20, alpha=.25, density=True)
-        plt.xlabel(r'$log_{10}$ LR')
-        if self.save_plots:
-            savefig = os.path.join(self.experiment_directory, "lr_distributions")
-            plt.savefig(savefig, dpi=600)
-            plt.close()
-        if show:
-            plt.show()
 
-    def plot_cllr_quality_2015(self, show=None):
-        """
-        Plots cllr obtained as function of Terhorst quality
-        """
-
-        y = self.results['y_test']
-        lr = self.results['lrs_predicted']
-        quality_pair = [(x.first.terhorst_quality_rounded, x.second.terhorst_quality_rounded) for x in
-                        self.results['test_pairs']]
-        quality = [x.quality for x in self.results['test_pairs']]
-        comparisons = [str(test_pair.comparison) for test_pair in self.results['test_pairs']]
-
-        data_per_comparison = defaultdict(list)
-        data = zip(y, lr, quality, quality_pair)
-        for datum, comparison in zip(data, comparisons):
-            if datum[2] != -1:
-                data_per_comparison[comparison].append(datum)
-
-        for comparison, datum in data_per_comparison.items():
-            data_per_comparison[comparison] = sorted(datum, key=lambda x: x[2], reverse=True)
-
-        n_points = 10
-        data_per_point = defaultdict(list)
-        for point in range(n_points):
-            for comparison, datum in list(data_per_comparison.items()):
-                if datum:
-                    quality_1 = datum[0][2]
-                    data_per_point[point] += [d_cllr for d_cllr in datum if d_cllr[2] == quality_1]
-                    data_per_comparison[comparison] = [d_cllr for d_cllr in datum if d_cllr[2] < quality_1]
-
-        cllrs = []
-        cllrs_acum = []
-        quality_label = []
-        lr_p_a = []
-        y_p_a = []
-        df_quality = pd.DataFrame(
-            columns=['Ref Min Quality', 'Frame Min Quality', 'Cllr Value', 'Cllr Type', 'Number of Pairs',
-                     'Quality Rank'])
-        for point, datum in data_per_point.items():
-            y_p = [data[0] for data in datum]
-            lr_p = [data[1] for data in datum]
-            y_p_a += y_p
-            lr_p_a += lr_p
-            min_quality = min([data[2] for data in datum])
-            quality_label.append(min_quality)
-            cllr = lir.metrics.cllr(np.asarray(lr_p), np.asarray(y_p))
-            cllr_acum = lir.metrics.cllr(np.asarray(lr_p_a), np.asarray(y_p_a))
-
-            cllrs.append(cllr)
-            cllrs_acum.append(cllr_acum)
-            print(f' point: {point}')
-            print(f' cllr: {cllr}')
-            print(f' cllr acum: {cllr_acum}')
-            print(f' quality label: {min_quality}')
-
-            df_quality = df_quality.append({'Ref Min Quality': min([data[3][1] for data in datum]),
-                                            'Frame Min Quality': min([data[3][0] for data in datum]),
-                                            'Cllr Value': cllr,
-                                            'Cllr Type': 'Not accumulated',
-                                            'Number of Pairs': len(y_p),
-                                            'Quality Rank': point + 1},
-                                           ignore_index=True)
-            df_quality = df_quality.append({'Ref Min Quality': min([data[3][1] for data in datum]),
-                                            'Frame Min Quality': min([data[3][0] for data in datum]),
-                                            'Cllr Value': cllr_acum,
-                                            'Cllr Type': 'Accumulated',
-                                            'Number of Pairs': len(y_p_a),
-                                            'Quality Rank': point + 1},
-                                           ignore_index=True)
-
-        # import dill  # pip install dill --user
-        filename = 'globalsave.pkl'
-        dill.dump_session(filename)
-
-        plt.scatter(range(n_points), cllrs, label='cllr', marker='o')
-        plt.scatter(range(n_points), cllrs_acum, label='cllr accumulated', marker='*')
-        cllr_labels = ['cllr', 'cllr_accumulated']
-        plt.legend(labels=cllr_labels)
-        plt.xticks(range(n_points), quality_label)
-        plt.xlabel('SER-FIQ quality')
-        plt.ylabel('Cllr')
-        plt.title('Cllr by quality for year 2015')
-
-        if self.save_plots:
-            savefig = os.path.join(self.experiment_directory, "cllr_quality_by_pairs")
-            plt.savefig(savefig, dpi=600)
-            plt.close()
-        if show:
-            plt.show()
-
-        markers = {"Accumulated": "s", "Not accumulated": "X"}
-        sns.scatterplot(data=df_quality, x='Frame Min Quality', y='Ref Min Quality', hue='Cllr Value',
-                        size='Number of Pairs', style='Cllr Type', markers=markers)
-
-        if self.save_plots:
-            savefig = os.path.join(self.experiment_directory, "cllr_quality_by_pairs_2")
-            plt.savefig(savefig, dpi=600)
-            plt.close()
-        if show:
-            plt.show()
-
-    def plot_cllr_quality_2015_v2(self, show=None):
-        """
-        Plots cllr obtained as function of Terhorst quality
-        """
-
-        y = self.results['y_test']
-        lr = self.results['lrs_predicted']
-        quality = [x.quality for x in self.results['test_pairs']]
-
-        data = sorted(zip(quality, lr, y), key=lambda x: x[0])
-
-        quality = [a for a, _, _ in data if a != -1]
-        lr = [b for a, b, _ in data if a != -1]
-        y = [c for a, _, c in data if a != -1]
-
-        st = 0
-        cllr = []
-
-        counts, bins, bars = plt.hist(quality, bins=6)
-        limits = itertools.accumulate(counts)
-        for limit in limits:
-            limit = int(limit)
-            lrp = lr[st:limit]
-            yp = y[st:limit]
-            cllr.append(lir.metrics.cllr(np.asarray(lrp),
-                                         np.asarray(yp)))
-            # print(cllr)
-            st = limit
-
-        plt.figure(figsize=(10, 10), dpi=100)
-        plt.scatter(bins[1:], cllr)
-        plt.xlabel('SER-FIQ Quality')
-        plt.ylabel('Cllr')
-        plt.title('Cllr by quality bins for year 2015')
-        if self.save_plots:
-            savefig = os.path.join(self.experiment_directory, "cllr_quality")
-            plt.savefig(savefig, dpi=600)
-            plt.close()
-        if show:
-            plt.show()
-
-    def plot_ROC_curve(self,
-                       show: Optional[bool] = False):
-        norm_distances = np.asarray(self.results["test_norm_distances"])
-        fpr, tpr, thresholds = roc_curve(self.results['y_test'], 1 - norm_distances)
-        plt.figure(figsize=(10, 10), dpi=100)
-        plt.plot(fpr, fpr, linestyle='--', label='No Skill')
-        plt.plot(fpr, tpr, color='r', label=r'ROC curve')
-        plt.xlabel('False positive rate (1 - specificity)')
-        plt.ylabel('True positive rate (sensitivity)')
-        plt.title('ROC curve')
-        plt.legend()
-        if self.save_plots:
-            savefig = os.path.join(self.experiment_directory, "ROC_curve")
-            plt.savefig(savefig, dpi=600)
-            plt.close()
-        if show:
-            plt.show()
-
-    def plot_performance_as_function_of_yaw(self,
-                                            show: Optional[bool] = None):
-        """
-        plots the scores as a function of the maximum yaw (=looking sideways) on
-        the images, coloured by ground truth. calls plt.show() if show is True.
-        """
-        df_yaws = pd.DataFrame(columns=['pair_id', 'y_test', 'yaw_first', 'yaw_second', 'score'])
-        for i, test_pair in enumerate(self.results['test_pairs']):
-            df_yaws = df_yaws.append(dict(pair_id=i,
-                                          y_test=self.results['y_test'][i],
-                                          yaw_first=test_pair.first.yaw.value,
-                                          yaw_second=test_pair.second.yaw.value,
-                                          score=self.results["test_norm_distances"][i]),
-                                     ignore_index=True)
-
-        sns.catplot(x="yaw_second", y="score", row='yaw_first', hue='y_test', kind="swarm", data=df_yaws)
-        plt.grid()
-        if self.save_plots:
-            savefig = os.path.join(self.experiment_directory, "performance_as_function_of_yaw")
-            plt.savefig(savefig, dpi=600)
-            plt.close()
-        if show:
-            plt.show()
-
-    def plot_performance_as_function_of_categories(self,
-                                                   show: Optional[bool] = None):
-        """
-        plots the scores as a function of the maximum yaw (=looking sideways) on
-        the images, coloured by ground truth. calls plt.show() if show is True.
-        """
-        categories = self.experiment.filters
-        first = lambda c: 'first_' + c
-        second = lambda c: 'second_' + c
-        first_categories = list(map(first, categories))
-        second_categories = list(map(second, categories))
-        df_categories = pd.DataFrame(columns=first_categories + second_categories + ['y_test'] + ['scores'])
-        df_categories['y_test'] = self.results['y_test']
-        df_categories['scores'] = self.results['test_norm_distances']
-        for i, category in enumerate(categories):
-            df_categories[first_categories[i]] = [pair.first.__dict__[category] for pair in self.results['test_pairs']]
-            df_categories[second_categories[i]] = [pair.second.__dict__[category] for pair in
-                                                   self.results['test_pairs']]
-
-        sns.pairplot(df_categories)
-        print("hola")
-
-        for i, test_pair in enumerate(self.results['test_pairs']):
-            df_yaws = df_yaws.append(dict(pair_id=i,
-                                          y_test=self.results['y_test'][i],
-                                          yaw_first=test_pair.first.yaw.value,
-                                          yaw_second=test_pair.second.yaw.value,
-                                          score=self.results["test_norm_distances"][i]),
-                                     ignore_index=True)
-
-        sns.catplot(x="yaw_second", y="score", row='yaw_first', hue='y_test', kind="swarm", data=df_yaws)
-        plt.grid()
-        if self.save_plots:
-            savefig = os.path.join(self.experiment_directory, "performance_as_function_of_yaw")
-            plt.savefig(savefig, dpi=600)
-            plt.close()
-        if show:
-            plt.show()
-
-    # todo: add resolution to image attributes.
-    # todo: fix the second plot.
-    '''        
-
-    def plot_performance_as_function_of_resolution(scores,
-                                                   test_pairs: List[FacePair],
-                                                   y_test,
-                                                   show_ratio: bool = False,
-                                                   savefig: Optional[str] = None,
-                                                   show: Optional[bool] = None):
-        """
-        plots the scores as a function of the minimum resolution found on the
-        two images of the pair, coloured by ground truth
-        """
-
-        if show_ratio:
-            resolutions = [np.prod(pair.first.get_image().shape[:2]) /
-                           np.prod(pair.second.get_image().shape[:2]) for
-                           pair in test_pairs]
-            label = 'ratio pixels'
-        else:
-            resolutions = [min(np.prod(pair.first.get_image().shape[:2]),
-                               np.prod(
-                                   pair.second.get_image().shape[:2])) / 10 ** 6
-                           for pair in test_pairs]
-            label = 'Mpixels (smallest image)'
-
-        plot_performance_as_a_function_of_x(
-            properties=resolutions,
-            scores=scores,
-            y_test=y_test,
-            x_label=label,
-            savefig=savefig,
-            show=show)
-            
-    
-
-    def plot_performance_as_a_function_of_x(
-            properties: List[float],
-            scores: List[float],
-            y_test: List[Union[int, bool]],
-            x_label: str, savefig: Optional[str], show: bool,
-            bins: Optional[List[Tuple[float, float]]] = None):
-        """
-        plots the scores as a function of some vector of properties, coloured by
-        ground truth. Includes mean in each of the bins, if provided
-        """
-        plt.figure(figsize=(10, 10), dpi=100)
-        colors = list(map(lambda x: 'blue' if x else 'red', y_test))
-        plt.scatter(properties, scores, c=colors)
-        plt.xlabel(x_label)
-        plt.ylabel('score')
-        if bins:
-            for bin in bins:
-                avg = np.mean([score for score, prop, y in
-                               zip(scores, properties, y_test)
-                               if bin[0] < prop < bin[1] and y])
-                plt.plot(bin, [avg, avg], c='blue')
-                avg = np.mean([score for score, prop, y in
-                               zip(scores, properties, y_test)
-                               if bin[0] < prop < bin[1] and not y])
-                plt.plot(bin, [avg, avg], c='red')
-        if savefig is not None:
-            plt.savefig(savefig)
-            plt.close()
-        if show or savefig is None:
-            plt.show()
-            
-        '''
-
-    def plot_tippett(self, show=None):
-        # predicted_log_lrs, y, savefig=None, show=None):
-        """
-        Plots the 10log LRs in a Tippett plot.
-        """
-
-        predicted_log_lrs = np.log10(self.results["lrs_predicted"])
-        xplot = np.linspace(
-            start=np.min(predicted_log_lrs),
-            stop=np.max(predicted_log_lrs),
-            num=100
-        )
-        lr_0, lr_1 = Xy_to_Xn(predicted_log_lrs, np.array(self.results["y_test"]))
-        perc0 = (sum(i > xplot for i in lr_0) / len(lr_0)) * 100
-        perc1 = (sum(i > xplot for i in lr_1) / len(lr_1)) * 100
-
-        plt.figure(figsize=(10, 10), dpi=100)
-        plt.plot(xplot, perc1, color='b', label=r'LRs given $\mathregular{H_1}$')
-        plt.plot(xplot, perc0, color='r', label=r'LRs given $\mathregular{H_2}$')
-        plt.axvline(x=0, color='k', linestyle='--')
-        plt.xlabel('Log likelihood ratio')
-        plt.ylabel('Cumulative proportion')
-        plt.title('Tippett plot')
-        plt.legend()
-        if self.save_plots:
-            savefig = os.path.join(self.experiment_directory, "tippet_plot")
-            plt.savefig(savefig, dpi=600)
-            plt.close()
-        if show:
-            plt.show()
-
-    def test_plotting(self, show=None):
-        with lir.plotting.show() as ax:
-            ax.pav(np.asarray(self.results["lrs_predicted"]), np.asarray(self.results["y_test"]))
-
-        if self.save_plots:
-            savefig = os.path.join(self.experiment_directory, "test_plot")
-            ax.savefig(savefig)
-            ax.close()
-        if show:
-            ax.show()
-
-    def plot_ece(self) -> object:
-        savefig = os.path.join(self.experiment_directory, "ECE_plot")
-        plot(np.asarray(self.results["lrs_predicted"]), np.asarray(self.results["y_test"]), path=savefig,
-             kw_figure={'figsize': (10, 10), 'dpi': 100})
-
-    def plot_cllr(self, show=None):
-        """
-        Plots cllr value for ENFSI tests. It computes both cllr of automated systems with the cllrs from experts.
-        If there is no ENFSI data, this graph does not show.
-
-        # todo: save table with cllr results.
-        """
-
-        cllr_auto_df = pd.DataFrame(columns=['Year', 'Expert', 'Cllr'])
-        cllr_exp_df = pd.DataFrame(columns=['Year', 'Expert', 'Cllr'])
-        years = self.experiment.enfsi_years
-
-        for year in years:
-            for cllr_exp in self.cllr_expert_per_year[year]:
-                cllr_exp_df = cllr_exp_df.append({'Year': str(year), 'LR Estimator': "Participant", 'Cllr': cllr_exp},
-                                                 ignore_index=True)
-
-            cllr_auto = self.cllr_auto_per_year[year]
-            cllr_auto_df = cllr_auto_df.append(
-                {'Year': str(year), 'LR Estimator': self.experiment.embeddingModel, 'Cllr': cllr_auto},
-                ignore_index=True)
-
-        cllr_df = cllr_exp_df.append(cllr_auto_df)
-        sns.set_style("whitegrid")
-        sc_plot = sns.catplot(data=cllr_df, x="Year", y="Cllr", hue="LR Estimator",
-                              palette=sns.color_palette(['orange', 'blue']))
-        # sc_plot.set_title("Cllrs for Automated system and ENFSI participants")
-        # sc_plot.set(xticks=[map(str, years)])
-
-        if self.save_plots:
-            savefig = os.path.join(self.experiment_directory, "cllr_experts")
-            plt.savefig(savefig, dpi=600)
-            plt.close()
-        if show:
-            plt.show()
-
-    
     def get_cllr_auto_per_year(self):
         years = [pair.first.year for pair in self.results["test_pairs"]]
         lrs_predicted = self.results["lrs_predicted"]
@@ -480,8 +78,21 @@ class GlobalEvaluator:
 
         self.experiments = experiments
         self.save_plots = save_plots
-        self.experiment_evaluators = self.get_experiment_evaluators(self.experiments)    
+        self.experiment_evaluators = self.get_experiment_evaluators(self.experiments)
 
+    
+    @staticmethod
+    def get_experiment_evaluators(experiments: ExperimentalSetup) -> List[ExperimentEvaluator]:
+        evaluators = []
+        for experiment in tqdm(experiments):
+            results = experiment.perform()
+            evaluation = ExperimentEvaluator(experiment=experiment, results=results, cllr_expert_per_year=experiments.cllr_expert_per_year)
+            evaluators.append(evaluation)
+        return evaluators
+
+    def make_experiment_plots(self):
+        for evaluator in self.experiment_evaluators:
+            evaluator.make_plots()
 
 
     def make_global_plot(self):
@@ -528,18 +139,5 @@ class GlobalEvaluator:
         savefig = os.path.join(self.experiments.output_dir,
                                f"cllr_summary_ES{self.experiments.embedding_model_as_scorer}")
         plt.savefig(savefig)
-        plt.close()
-
-    def make_experiment_plots(self):
-        for evaluator in self.experiment_evaluators:
-            evaluator.make_plots()
-
-    @staticmethod
-    def get_experiment_evaluators(experiments: ExperimentalSetup) -> List[ExperimentEvaluator]:
-        evaluators = []
-        for experiment in tqdm(experiments):
-            results = experiment.perform()
-            evaluation = ExperimentEvaluator(experiment=experiment, results=results, cllr_expert_per_year=experiments.cllr_expert_per_year)
-            evaluators.append(evaluation)
-        return evaluators
+        plt.close() 
 

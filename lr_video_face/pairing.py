@@ -71,6 +71,7 @@ def get_valid_test_pairs(session,
 def get_test_pairs_per_category(session,
                                 image_filters,
                                 face_image_filters,
+                                quality_filters,
                                 detector,
                                 embeddingModel,
                                 enfsi_years):

@@ -221,7 +221,7 @@ class ExperimentalSetup:
 
     
     def _get_directory(self):
-        filters = self.image_filters + self.face_image_filters
+        filters = self.image_filters + self.face_image_filters + self.quality_filters
         subfolder = f'[{",".join(filters)}]'
         folder = f'C_({self.n_calibration_pairs})_[{",".join(self.calibration_db)}]_T_[{",".join([str(year) for year in self.enfsi_years])}]'
         return os.path.join(folder, subfolder)
