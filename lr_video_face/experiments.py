@@ -36,6 +36,7 @@ class Experiment:
     def __init__(self,
         detector: str,
         embeddingModel: str,
+        qualityModel: str,
         scorer: BaseEstimator,
         calibrator: BaseEstimator,
         calibration_db: List[str],
@@ -53,6 +54,7 @@ class Experiment:
 
         self.detector = detector
         self.embeddingModel = embeddingModel
+        self.qualityModel = qualityModel
         self.scorer = scorer
         self.calibrator = calibrator
         self.calibration_db = calibration_db
@@ -109,6 +111,7 @@ class Experiment:
                                                                             self.quality_filters,
                                                                             self.detector,
                                                                             self.embeddingModel,
+                                                                            self.qualityModel,
                                                                             self.calibration_db,
                                                                             self.n_calibration_pairs,
                                                                             self.session)
@@ -167,6 +170,7 @@ class ExperimentalSetup:
     def __init__(self, 
                 detectors, 
                 embeddingModels, 
+                qualityModels,
                 calibrator_names, 
                 calibration_db, 
                 enfsi_years, 
@@ -183,6 +187,7 @@ class ExperimentalSetup:
 
         self.detectors = detectors
         self.embeddingModels = embeddingModels
+        self.qualityModels = qualityModels
         self.calibrators = self._get_calibrators(calibrator_names)
         self.calibration_db = calibration_db
         self.enfsi_years = enfsi_years
@@ -274,26 +279,28 @@ class ExperimentalSetup:
         experiments = []
         for detector in self.detectors:
             for embeddingModel in self.embeddingModels:
-                for calibrator in self.calibrators:
-                    if self.embedding_model_as_scorer:
-                        scorer = ScorerModel(metric=self.metrics, embeddingModel=embeddingModel)
-                    else:
-                        scorer = LogisticRegression(solver='lbfgs')
-                    experiments.append(Experiment(
-                        detector,
-                        embeddingModel,
-                        scorer,
-                        calibrator,
-                        self.calibration_db,
-                        self.enfsi_years,
-                        self.image_filters,
-                        self.face_image_filters,
-                        self.quality_filters,
-                        self.metrics,
-                        self.n_calibration_pairs,
-                        self.embedding_model_as_scorer,
-                        self.output_dir,
-                        self.session
+                for qualityModel in self.qualityModels:
+                    for calibrator in self.calibrators:
+                        if self.embedding_model_as_scorer:
+                            scorer = ScorerModel(metric=self.metrics, embeddingModel=embeddingModel)
+                        else:
+                            scorer = LogisticRegression(solver='lbfgs')
+                        experiments.append(Experiment(
+                            detector,
+                            embeddingModel,
+                            qualityModel,
+                            scorer,
+                            calibrator,
+                            self.calibration_db,
+                            self.enfsi_years,
+                            self.image_filters,
+                            self.face_image_filters,
+                            self.quality_filters,
+                            self.metrics,
+                            self.n_calibration_pairs,
+                            self.embedding_model_as_scorer,
+                            self.output_dir,
+                            self.session
                     ))
 
         return experiments

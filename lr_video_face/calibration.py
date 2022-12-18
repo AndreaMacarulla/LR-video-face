@@ -52,6 +52,7 @@ def get_filtered_images(image_filters,
                         filter_values: tuple,
                         detector,
                         embeddingModel,
+                        qualityModel,
                         calibration_db,
                         session):
 
@@ -89,6 +90,7 @@ def get_calibration_pairs_per_category(categories,
                                         quality_filters,
                                         detector,
                                         embeddingModel,
+                                        qualityModel,
                                         calibration_db,
                                         n_calibration_pairs,
                                         session
@@ -105,6 +107,7 @@ def get_calibration_pairs_per_category(categories,
                                                     pair_category[0],
                                                     detector,
                                                     embeddingModel,
+                                                    qualityModel,
                                                     calibration_db,
                                                     session
                                                     )
@@ -132,6 +135,7 @@ def get_calibration_pairs_per_category(categories,
                                                     pair_category[1],
                                                     detector,
                                                     embeddingModel,
+                                                    qualityModel,
                                                     calibration_db,
                                                     session)
             if emb_facevacs:
