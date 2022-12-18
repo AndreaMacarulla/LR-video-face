@@ -67,20 +67,27 @@ def get_filtered_images(image_filters,
     assert len(fi_filter_values) + len(face_image_filters) + len(quality_filters) == len(filter_values)
 
 
-    query = session.query(FaceImage, Image.identity, Image.image_id)
+    query = session.query(FaceImage, Image.identity, Image.image_id, QualityImage.quality)
     join_query = query \
+        .join(QualityImage, QualityImage.faceImage_id == FaceImage.faceImage_id) \
         .join(CroppedImage, CroppedImage.croppedImage_id == FaceImage.croppedImage_id) \
         .join(Image, Image.image_id == CroppedImage.image_id) \
         .join(Detector) \
-        .join(EmbeddingModel)
+        .join(EmbeddingModel)\
+        .join(QualityModel)
+
     filter_query = join_query \
         .filter(EmbeddingModel.name == embeddingModel,
-                Detector.name == detector) \
+                Detector.name == detector), QualityModel.name == qualityModel \
         .filter(Image.source.in_(calibration_db))
     for cal_filter, value in zip(face_image_filters, fi_filter_values):
         filter_query = filter_query.filter(FaceImage.__dict__[cal_filter] == value)
     for cal_filter, value in zip(image_filters, im_filter_values):
         filter_query = filter_query.filter(Image.__dict__[cal_filter] == value)
+    for cal_filter, value in zip(quality_filters, qi_filter_values):
+        filter_query = filter_query.filter(Image.__dict__[cal_filter] == value)
+
+
     return filter_query.all()
 
 # %% ../nbs/04_calibration.ipynb 7
