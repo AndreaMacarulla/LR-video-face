@@ -7,9 +7,14 @@ __all__ = ['plot_lr_distributions', 'plot_ROC_curve', 'plot_tippett', 'plot_cllr
 from typing import Dict, List, Optional
 from sklearn.metrics import roc_curve
 from lir import Xy_to_Xn
+from lir.ece import plot
 
+import os
 import numpy as np 
+import pandas as pd
+
 from matplotlib import pyplot as plt 
+import seaborn as sns
 
 
 # %% ../nbs/06_plots.ipynb 4
@@ -86,7 +91,8 @@ def plot_tippett(results:Dict, experiment_directory, save_plots:bool = True, sho
         plt.show()
 
 # %% ../nbs/06_plots.ipynb 7
-def plot_cllr(results:Dict, experiment_directory, enfsi_years: List[int], cllr_expert_per_year:Dict, embeddingModel, save_plots:bool = True, show: Optional[bool] = False):
+def plot_cllr(results:Dict, experiment_directory, enfsi_years: List[int], cllr_expert_per_year:Dict, 
+    cllr_auto_per_year:Dict, embeddingModel, save_plots:bool = True, show: Optional[bool] = False):
     
     """
     Plots cllr value for ENFSI tests. It computes both cllr of automated systems with the cllrs from experts.

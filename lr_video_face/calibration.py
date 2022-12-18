@@ -48,6 +48,7 @@ def make_cal_face_pairs(first_list_of_face_images: List[Union[FaceImage, str]],
 # %% ../nbs/04_calibration.ipynb 6
 def get_filtered_images(image_filters, 
                         face_image_filters,
+                        quality_filters,
                         filter_values: tuple,
                         detector,
                         embeddingModel,
@@ -55,9 +56,15 @@ def get_filtered_images(image_filters,
                         session):
 
 
+    #im_filter_values = filter_values[:len(image_filters)]
+    #fi_filter_values = filter_values[len(image_filters):]
+    #assert len(fi_filter_values) == len(face_image_filters)
     im_filter_values = filter_values[:len(image_filters)]
-    fi_filter_values = filter_values[len(image_filters):]
-    assert len(fi_filter_values) == len(face_image_filters)
+    fi_filter_values = filter_values[len(image_filters):][:len(face_image_filters)]
+    qi_filter_values = filter_values[-len(quality_filters):]
+
+    assert len(fi_filter_values) + len(face_image_filters) + len(quality_filters) == len(filter_values)
+
 
     query = session.query(FaceImage, Image.identity, Image.image_id)
     join_query = query \
@@ -79,6 +86,7 @@ def get_filtered_images(image_filters,
 def get_calibration_pairs_per_category(categories,
                                         image_filters, 
                                         face_image_filters,
+                                        quality_filters,
                                         detector,
                                         embeddingModel,
                                         calibration_db,
@@ -93,6 +101,7 @@ def get_calibration_pairs_per_category(categories,
 
         first_image_category = get_filtered_images(image_filters, 
                                                     face_image_filters,
+                                                    quality_filters,
                                                     pair_category[0],
                                                     detector,
                                                     embeddingModel,
@@ -119,6 +128,7 @@ def get_calibration_pairs_per_category(categories,
         else:
             second_image_category = get_filtered_images(image_filters, 
                                                     face_image_filters,
+                                                    quality_filters,
                                                     pair_category[1],
                                                     detector,
                                                     embeddingModel,

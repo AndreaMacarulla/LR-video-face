@@ -42,7 +42,8 @@ class ExperimentEvaluator:
         plot_ROC_curve(self.results, self.experiment_directory, self.save_plots)
         plot_tippett(self.results, self.experiment_directory, self.save_plots)
         plot_ece(self.results, self.experiment_directory, self.save_plots)
-        plot_cllr(self.results, self.experiment_directory, self.experiemtn.enfsi_years, self.cllr_expert_per_year, self.experiment.embeddingModel, self.save_plots)
+        plot_cllr(self.results, self.experiment_directory, self.experiment.enfsi_years, 
+            self.cllr_expert_per_year, self.cllr_auto_per_year, self.experiment.embeddingModel, self.save_plots)
 
 
     def get_cllr_auto_per_year(self):
