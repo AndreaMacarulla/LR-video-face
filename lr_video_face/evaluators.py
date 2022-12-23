@@ -14,6 +14,7 @@ from matplotlib import pyplot as plt
 
 from tqdm import tqdm
 from collections import defaultdict
+from statistics import mean
 
 from lr_video_face.experiments import Experiment, ExperimentalSetup
 from lr_video_face.plots import *
@@ -99,11 +100,11 @@ class GlobalEvaluator:
     def make_global_plot(self):
         experiment_df = pd.DataFrame(
             columns=['Year', 'Filters', 'Detector', 'Embedding Model', 'Calibrator', 'Cllr'])
-        filters = self.experiments.filters + self.experiments.face_image_filters
+        filters = self.experiments.image_filters + self.experiments.face_image_filters
         str_filters = ",".join(filters)
         for evaluator in self.experiment_evaluators:
 
-            if isinstance(evaluator.experiment.calibrator, IsotonicCalibrator):
+            if isinstance(evaluator.experiment.calibrator, lir.IsotonicCalibrator):
                 calibrator_name = 'Isotonic Calibrator'
             else:
                 calibrator_name = str(evaluator.experiment.calibrator)
@@ -120,7 +121,7 @@ class GlobalEvaluator:
             for detector in self.experiments.detectors:
                 for calibrator in self.experiments.calibrators:
 
-                    if isinstance(calibrator, IsotonicCalibrator):
+                    if isinstance(calibrator, lir.IsotonicCalibrator):
                         calibrator_name = 'Isotonic Calibrator'
                     else:
                         calibrator_name = str(calibrator)

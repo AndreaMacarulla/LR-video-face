@@ -39,6 +39,7 @@ def make_cal_face_pairs(first_list_of_face_images: List[Union[FaceImage, str]],
                                   combinations(first_list_of_face_images, 2) if not row1.identity == row2.identity)
 
     # todo: add shuffle.
+    # ChatGPT solution: iterador = random.sample(mi_generador(), k=10). Cuidado con number_of_pairs = None.
     # todo: make dif pairs with same person first as same identity pairs.
     all_cal_face_pairs_same_identity = list(islice(all_pairs_same_identity, number_of_pairs))
     all_cal_face_pairs_dif_identity = list(islice(all_pairs_dif_identity, number_of_pairs))
@@ -48,44 +49,38 @@ def make_cal_face_pairs(first_list_of_face_images: List[Union[FaceImage, str]],
 # %% ../nbs/04_calibration.ipynb 6
 def get_filtered_images(image_filters, 
                         face_image_filters,
-                        quality_filters,
+                        # quality_filters,
                         filter_values: tuple,
                         detector,
                         embeddingModel,
-                        qualityModel,
+                        # qualityModel,
                         calibration_db,
                         session):
 
 
-    #im_filter_values = filter_values[:len(image_filters)]
-    #fi_filter_values = filter_values[len(image_filters):]
-    #assert len(fi_filter_values) == len(face_image_filters)
     im_filter_values = filter_values[:len(image_filters)]
-    fi_filter_values = filter_values[len(image_filters):][:len(face_image_filters)]
-    qi_filter_values = filter_values[-len(quality_filters):]
+    fi_filter_values = filter_values[len(image_filters):]
+    assert len(fi_filter_values) == len(face_image_filters)
+    # im_filter_values = filter_values[:len(image_filters)]
+    # fi_filter_values = filter_values[len(image_filters):][:len(face_image_filters)]
+    # qi_filter_values = filter_values[-len(quality_filters):]
 
-    assert len(fi_filter_values) + len(face_image_filters) + len(quality_filters) == len(filter_values)
-
-
-    query = session.query(FaceImage, Image.identity, Image.image_id, QualityImage.quality)
+    
+    query = session.query(FaceImage, Image.identity, Image.image_id)
     join_query = query \
-        .join(QualityImage, QualityImage.faceImage_id == FaceImage.faceImage_id) \
         .join(CroppedImage, CroppedImage.croppedImage_id == FaceImage.croppedImage_id) \
         .join(Image, Image.image_id == CroppedImage.image_id) \
         .join(Detector) \
-        .join(EmbeddingModel)\
-        .join(QualityModel)
+        .join(EmbeddingModel)
 
     filter_query = join_query \
         .filter(EmbeddingModel.name == embeddingModel,
-                Detector.name == detector), QualityModel.name == qualityModel \
-        .filter(Image.source.in_(calibration_db))
+                Detector.name == detector) \
+        .filter(Image.source.in_(calibration_db)) 
     for cal_filter, value in zip(face_image_filters, fi_filter_values):
         filter_query = filter_query.filter(FaceImage.__dict__[cal_filter] == value)
     for cal_filter, value in zip(image_filters, im_filter_values):
-        filter_query = filter_query.filter(Image.__dict__[cal_filter] == value)
-    for cal_filter, value in zip(quality_filters, qi_filter_values):
-        filter_query = filter_query.filter(Image.__dict__[cal_filter] == value)
+        filter_query = filter_query.filter(Image.__dict__[cal_filter] == value)    
 
 
     return filter_query.all()
@@ -94,10 +89,10 @@ def get_filtered_images(image_filters,
 def get_calibration_pairs_per_category(categories,
                                         image_filters, 
                                         face_image_filters,
-                                        quality_filters,
+                                        # quality_filters,
                                         detector,
                                         embeddingModel,
-                                        qualityModel,
+                                        # qualityModel,
                                         calibration_db,
                                         n_calibration_pairs,
                                         session
@@ -110,11 +105,11 @@ def get_calibration_pairs_per_category(categories,
 
         first_image_category = get_filtered_images(image_filters, 
                                                     face_image_filters,
-                                                    quality_filters,
+                                                    # quality_filters,
                                                     pair_category[0],
                                                     detector,
                                                     embeddingModel,
-                                                    qualityModel,
+                                                    # qualityModel,
                                                     calibration_db,
                                                     session
                                                     )
@@ -138,11 +133,11 @@ def get_calibration_pairs_per_category(categories,
         else:
             second_image_category = get_filtered_images(image_filters, 
                                                     face_image_filters,
-                                                    quality_filters,
+                                                    # quality_filters,
                                                     pair_category[1],
                                                     detector,
                                                     embeddingModel,
-                                                    qualityModel,
+                                                    # qualityModel,
                                                     calibration_db,
                                                     session)
             if emb_facevacs:
