@@ -4,7 +4,12 @@
 __all__ = ['get_test_pairs', 'get_valid_test_pairs_2015', 'get_valid_test_pairs', 'get_test_pairs_per_category']
 
 # %% ../nbs/03_pairing.ipynb 3
+import math
+import pandas as pd
+import numpy as np
 from typing import Tuple
+from itertools import islice
+
 from sqlalchemy.orm import aliased
 from collections import defaultdict
 
@@ -23,8 +28,11 @@ def get_test_pairs(enfsi_years, session):
 def get_valid_test_pairs_2015(session, 
                         detector,
                         embeddingModel,
-                        qualityModel) -> Tuple[EnfsiPair, FaceImage, FaceImage]:
+                        qualityModel,
+                        quality_dropouts)->Tuple[EnfsiPair2015, FaceImage, FaceImage, float]:
 
+    
+    # todo: alias not needed anymore. Remove them.
     first_cropped_image = aliased(CroppedImage)
     second_cropped_image = aliased(CroppedImage)
     first_detector = aliased(Detector)
@@ -55,44 +63,64 @@ def get_valid_test_pairs_2015(session,
     for row in query_face_img_id:
         face_image_dict[row[0]] = (row[1], row[2]) 
 
-    query_pair_id = session.query(EnfsiPair2015)
-
-    query_1 = query_pair_id \
+    
+    subquery_pair = session.query(EnfsiPair2015.enfsiPair2015_id)\
         .join(first_cropped_image, EnfsiPair2015.first_id == first_cropped_image.image_id) \
         .filter(first_cropped_image.detector_id == det_id,
-                first_cropped_image.face_detected == True)
+                first_cropped_image.face_detected == True).subquery()
 
-    # query1 = query_1.all()
 
-    query_2 = query_pair_id \
+    query_pair = session.query(EnfsiPair2015) \
         .join(second_cropped_image, EnfsiPair2015.second_id == second_cropped_image.image_id) \
         .filter(second_cropped_image.detector_id == det_id,
-                second_cropped_image.face_detected == True)
+                second_cropped_image.face_detected == True,
+                EnfsiPair2015.enfsiPair2015_id.in_(subquery_pair))
 
-    # query2 = query_2.all()
-    query = (query_1.intersect(query_2).all())
+    
+    query = query_pair.all()
 
-    # id1 = [x.enfsiPair2015_id for x in query1]
-    # id2 = [x.enfsiPair2015_id for x in query2]
-
-    # interseccion = list(set(id1).intersection(id2))
-
-    # query = [x for x in query1 if x.enfsiPair2015_id in interseccion]
+    comparisons = list(set([enfsi_pair.comparison for enfsi_pair in query]))
 
     best_pairs = []
 
-    for x in range(17):
+    # imagen promedio por comparison, no existe en Database
+    mean_image = pd.DataFrame(columns = ['Comparison','embedding1','embedding2'])
+    
+    for x in comparisons:
+
         comp_pairs = [(pair, min(face_image_dict[pair.first.image_id][1], face_image_dict[pair.second.image_id][1])) \
             for pair in query\
-            if pair.comparison == x+1]
+            if pair.comparison == x]
 
         comp_pairs.sort(key=lambda x:x[1], reverse=True)
-        best_pairs+=comp_pairs[:int(len(comp_pairs)*1)]
-        # best_pairs+=list(islice(comp_pairs, int(len(comp_pairs) * 0.25)))
+
+        qua_pairs = [comp_pair[0] for comp_pair in comp_pairs]
+
+        for dropout in quality_dropouts:
+            # best_pairs+=comp_pairs[:int(len(comp_pairs)*dropout)]
+            truncated_pairs = list(islice(qua_pairs, math.ceil(len(qua_pairs) * dropout)))
+            drop_pairs = [(pair, dropout) for pair in truncated_pairs]
+            best_pairs += drop_pairs
+
+
+
+        emb1  = [face_image_dict[pair[0].first.image_id][0].embeddings for pair in comp_pairs]
+        weight1 = [face_image_dict[pair[0].first.image_id][1] for pair in comp_pairs]
+        embedding_first = np.dot(weight1,emb1)/np.sum(weight1)
+
+        emb2  = [face_image_dict[pair[0].second.image_id][0].embeddings for pair in comp_pairs]
+        weight2 = [face_image_dict[pair[0].second.image_id][1] for pair in comp_pairs]
+        embedding_second = np.dot(weight2,emb2)/np.sum(weight2)
+
+        mean_image = mean_image.append({'Comparison':x,'embedding1':embedding_first,'embedding2':embedding_second}, ignore_index = True)
+
+        #emb1 ,weigth2 = [face_image_dict[pair.second.image_id][0].embeddings, face_image_dict[pair.second.image_id][1] for pair in comp_pairs]
+
 
         
 
-    valid_test_pairs = [(pair[0], face_image_dict[pair[0].first.image_id][0], face_image_dict[pair[0].second.image_id][0])
+    valid_test_pairs = [(pair[0], face_image_dict[pair[0].first.image_id][0],\
+                        face_image_dict[pair[0].second.image_id][0], pair[1])
                         for pair in best_pairs]
     
     return valid_test_pairs
@@ -140,7 +168,9 @@ def get_valid_test_pairs(session,
 
     query = (query_1.intersect(query_2).all())
 
-    valid_test_pairs = [(pair, face_image_dict[pair.first.image_id], face_image_dict[pair.second.image_id])
+    # The one at the end indicates all the pairs are chosen (see year 2015).
+    valid_test_pairs = [(pair, face_image_dict[pair.first.image_id],\
+                        face_image_dict[pair.second.image_id], 1)
                         for pair in query]
     
     return valid_test_pairs
@@ -152,21 +182,25 @@ def get_test_pairs_per_category(session,
                                 detector,
                                 embeddingModel,
                                 qualityModel,
-                                enfsi_years):
+                                enfsi_years,
+                                quality_dropout):
 
     valid_test_pairs = []
+    enfsi_short = enfsi_years.copy()
     
     if 2015 in enfsi_years:
-        enfsi_years.remove(2015)
+
+        enfsi_short.remove(2015)
         valid_test_pairs += get_valid_test_pairs_2015(session,
                                             detector,
                                             embeddingModel,
-                                            qualityModel)
+                                            qualityModel,
+                                            quality_dropout)
         
     valid_test_pairs += get_valid_test_pairs(session,
                                             detector,
                                             embeddingModel,
-                                            enfsi_years)
+                                            enfsi_short)
     
     
 

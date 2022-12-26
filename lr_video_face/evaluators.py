@@ -34,25 +34,60 @@ class ExperimentEvaluator:
         self.cllr_expert_per_year = cllr_expert_per_year
         self.results = results
         self.save_plots = save_plots
+
         self.experiment_directory = self.experiment.output_dir
+        self.years = [pair.first.year for pair in self.results["test_pairs"]]
+
+        
         self.cllr_auto_per_year = self.get_cllr_auto_per_year()
+        self.results_2015 = self._get_results_2015(self.results, self.years)
+        self.drop_zero_results = self._get_drop_zero_results(self.results)
+        self.cllrs_2015 = self._get_cllrs_2015(self.results_2015)
     
 
     def make_plots(self):
-        plot_lr_distributions(self.results, self.experiment_directory, self.save_plots)
-        plot_ROC_curve(self.results, self.experiment_directory, self.save_plots)
-        plot_tippett(self.results, self.experiment_directory, self.save_plots)
-        plot_ece(self.results, self.experiment_directory, self.save_plots)
-        plot_cllr(self.results, self.experiment_directory, self.experiment.enfsi_years, 
+        #if 2015 in self.experiment.enfsi_years:
+
+        plot_lr_distributions(self.drop_zero_results, self.experiment_directory, self.save_plots)
+        plot_ROC_curve(self.drop_zero_results, self.experiment_directory, self.save_plots)
+        plot_tippett(self.drop_zero_results, self.experiment_directory, self.save_plots)
+        plot_ece(self.drop_zero_results, self.experiment_directory, self.save_plots)
+        plot_cllr(self.drop_zero_results, self.experiment_directory, self.experiment.enfsi_years, 
             self.cllr_expert_per_year, self.cllr_auto_per_year, self.experiment.embeddingModel, self.save_plots)
+
+        if 2015 in self.years:
+            plot_cllr_per_qualitydrop(self.cllrs_2015, self.experiment_directory, self.save_plots)
+    
+    
+    
+    
+    @staticmethod
+    def _get_drop_zero_results(results:Dict[str, list])->Dict[str, list]:
+        drop_zero_results = {}
+        dropouts = results["quality_drops"]
+
+        for key, values in results.items():
+            drop_zero_results[key] = [value for value, dropout \
+                                        in zip(values, dropouts)\
+                                        if dropout == 1]
+        return drop_zero_results
+
+    @staticmethod
+    def _get_results_2015(results:Dict[str, list], years:List[int])->Dict[str, list]:
+        results_2015 = {}
+        for key, values in results.items():
+            results_2015[key] = [value for value, year \
+                                        in zip(values, years)\
+                                        if year == 2015]
+        return results_2015
 
 
     def get_cllr_auto_per_year(self):
-        years = [pair.first.year for pair in self.results["test_pairs"]]
+        # years = [pair.first.year for pair in self.results["test_pairs"]]
         lrs_predicted = self.results["lrs_predicted"]
         y_test = self.results["y_test"]
 
-        data_per_year = zip(years, lrs_predicted, y_test)
+        data_per_year = zip(self.years, lrs_predicted, y_test)
 
         lrs_predicted_per_year = defaultdict(list)
         y_test_per_year = defaultdict(list)
@@ -63,11 +98,37 @@ class ExperimentEvaluator:
 
         cllr_auto_per_year = {}
 
-        for year in np.unique(years):
+        for year in np.unique(self.years):
             cllr_auto_per_year[year] = lir.metrics.cllr(np.asarray(lrs_predicted_per_year[year]),
                                                         np.asarray(y_test_per_year[year]))
 
         return cllr_auto_per_year
+
+    
+    @staticmethod
+    def _get_cllrs_2015(results_2015:Dict[str, list])->Dict[float, float]:
+
+        lrs_predicted = results_2015["lrs_predicted"]
+        y_test = results_2015["y_test"]
+        dropouts = results_2015["quality_drops"]
+
+        data_per_dropout = zip(dropouts, lrs_predicted, y_test)
+
+        lrs_predicted_per_dropout = defaultdict(list)
+        y_test_per_dropout = defaultdict(list)
+        
+        for dropout, lr, y in data_per_dropout:
+            lrs_predicted_per_dropout[dropout].append(lr)
+            y_test_per_dropout[dropout].append(y)
+
+
+        cllr_per_dropout = {}
+
+        for dropout in set(dropouts):
+            cllr_per_dropout[dropout] = lir.metrics.cllr(np.asarray(lrs_predicted_per_dropout[dropout]),
+                                                        np.asarray(y_test_per_dropout[dropout]))
+        
+        return cllr_per_dropout
 
 
 # %% ../nbs/05_evaluators.ipynb 5

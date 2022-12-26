@@ -48,7 +48,8 @@ class Experiment:
         n_calibration_pairs: int,
         embedding_model_as_scorer: bool,
         root_output_dir: str,
-        session
+        session,
+        quality_dropout
         ):    
     
 
@@ -68,6 +69,7 @@ class Experiment:
         self.root_output_dir = root_output_dir
         self.output_dir = self._get_output_dir()
         self.session = session
+        self.quality_dropout = quality_dropout
 
 
     def _get_output_dir(self):
@@ -100,11 +102,11 @@ class Experiment:
         test_pairs_per_category = get_test_pairs_per_category(self.session, 
                                                             self.image_filters, 
                                                             self.face_image_filters, 
-                                                            # self.quality_filters,
                                                             self.detector, 
                                                             self.embeddingModel,
                                                             self.qualityModel,
-                                                            self.enfsi_years)
+                                                            self.enfsi_years,
+                                                            self.quality_dropout)
         # Get calibration pair per category.
         calibration_pairs_per_category = get_calibration_pairs_per_category(test_pairs_per_category.keys(),
                                                                             self.image_filters, 
@@ -177,12 +179,12 @@ class ExperimentalSetup:
                 enfsi_years, 
                 image_filters, 
                 face_image_filters,
-                # quality_filters,
                 metrics, 
                 n_calibration_pairs, 
                 embedding_model_as_scorer,
                 results_folder:str,
                 session,
+                quality_dropout = [1],
                 name:datetime = datetime.now().strftime("%Y-%m-%d %H %M %S")
                 ):
 
@@ -200,7 +202,8 @@ class ExperimentalSetup:
         self.embedding_model_as_scorer = embedding_model_as_scorer
         self.session = session
         
-        self.name = datetime.now().strftime("%Y-%m-%d %H %M %S")
+        self.quality_dropout = quality_dropout
+        self.name = name
         self.output_dir= self._make_output_dir(results_folder)
         self.experiments = self.prepare_experiments()
         self.cllr_expert_per_year = self._get_cllr_expert_per_year()
@@ -297,12 +300,12 @@ class ExperimentalSetup:
                             self.enfsi_years,
                             self.image_filters,
                             self.face_image_filters,
-                            # self.quality_filters,
                             self.metrics,
                             self.n_calibration_pairs,
                             self.embedding_model_as_scorer,
                             self.output_dir,
-                            self.session
+                            self.session,
+                            self.quality_dropout
                     ))
 
         return experiments

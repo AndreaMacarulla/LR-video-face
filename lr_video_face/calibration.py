@@ -218,6 +218,8 @@ def predict_lr(enfsi_years,
 
             test_pairs = [row_test_pair[0] for row_test_pair in row_test_pairs]
 
+            quality_drops = [row_test_pair[-1] for row_test_pair in row_test_pairs]
+
             test_norm_distances = [pair.norm_distance for pair in pairs]
 
             if embedding_model_as_scorer:
@@ -236,6 +238,7 @@ def predict_lr(enfsi_years,
             results["lrs_predicted"] += list(lrs_predicted[category])
             results["y_test"] += y_test
             results["test_norm_distances"] += test_norm_distances
+            results["quality_drops"] += quality_drops
 
         results['original_test_pairs'] = get_test_pairs(enfsi_years, session)
 
