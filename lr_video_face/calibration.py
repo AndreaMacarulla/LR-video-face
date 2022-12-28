@@ -205,12 +205,14 @@ def predict_lr(enfsi_years,
                 embedding_model_as_scorer,
                 metrics,
                 lr_systems, 
-                test_pairs_per_category, 
+                test_pairs_per_category,
+                df_pairs_2015,
                 session
                 ):
 
         results = defaultdict(list)
         lrs_predicted = {}
+        lrs_predicted_2015 = {}
         for category, row_test_pairs in test_pairs_per_category.items():
 
             pairs = [FacePair(row_test_pair[1], row_test_pair[2], row_test_pair[0].same) 
@@ -221,6 +223,7 @@ def predict_lr(enfsi_years,
             quality_drops = [row_test_pair[-1] for row_test_pair in row_test_pairs]
 
             test_norm_distances = [pair.norm_distance for pair in pairs]
+            test_dist_2015 = []
 
             if embedding_model_as_scorer:
                 X_test = pairs
@@ -240,6 +243,12 @@ def predict_lr(enfsi_years,
             results["test_norm_distances"] += test_norm_distances
             results["quality_drops"] += quality_drops
 
+            #Dataframe treatment
+            lrs_predicted_2015[category] = lr_systems[category].predict_lr(df_pairs_2015)
+            results["lrs_predicted_2015"] += list(lrs_predicted_2015[category])
+            results["y_test_2015"] += list(df_pairs_2015.y)
+
         results['original_test_pairs'] = get_test_pairs(enfsi_years, session)
+        
 
         return results

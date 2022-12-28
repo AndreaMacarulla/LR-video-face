@@ -5,6 +5,7 @@ __all__ = ['FacePair', 'ScorerModel']
 
 # %% ../nbs/01_orm.ipynb 3
 import numpy as np
+import pandas as pd
 from typing import List
 
 from deepface.commons import distance as dst
@@ -59,8 +60,39 @@ class ScorerModel:
         self.embeddingModel=embeddingModel
         self.metric=metric
 
-    def predict_proba(self, pairs: List[FacePair]):
+    #todo: clean this code.
+    def predict_proba(self, pairs):
+
+        if isinstance(pairs, list):
+            return self.predict_proba_pair(pairs)
+        elif isinstance(pairs, pd.DataFrame):
+            return self.predict_proba_df(pairs)
+        else:
+            ValueError (f"Pairs are not valid.")
+
+    def predict_proba_pair(self, pairs: List[FacePair]):
         distances = [pair.norm_distance for pair in pairs]
+        distances = np.reshape(np.asarray(distances), (-1, 1))
+        # norm_dist = (distances - np.min(distances)) / (np.max(distances) - np.min(distances))
+        
+        p = np.concatenate((distances, 1 - distances), axis=1)
+        
+
+        return p
+
+    def predict_proba_df(self, pairs: pd.DataFrame):
+        # distances = [pair.norm_distance for pair in pairs]
+        distances = []
+        for index, row in pairs.iterrows():
+            emb1 = np.asarray(row.embedding1)
+            emb2 = np.asarray(row.embedding2)
+            norm_emb_1 = emb1 / np.linalg.norm(emb1)
+            norm_emb_2 = emb2 / np.linalg.norm(emb2)
+
+            distances.append(np.linalg.norm(norm_emb_1 - norm_emb_2) / 2)
+            
+
+
         distances = np.reshape(np.asarray(distances), (-1, 1))
         # norm_dist = (distances - np.min(distances)) / (np.max(distances) - np.min(distances))
         

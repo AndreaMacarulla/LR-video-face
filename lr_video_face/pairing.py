@@ -84,7 +84,7 @@ def get_valid_test_pairs_2015(session,
     best_pairs = []
 
     # imagen promedio por comparison, no existe en Database
-    mean_image = pd.DataFrame(columns = ['Comparison','embedding1','embedding2'])
+    df_mean_image = pd.DataFrame(columns = ['Comparison','embedding1','embedding2', 'y'])
     
     for x in comparisons:
 
@@ -112,7 +112,9 @@ def get_valid_test_pairs_2015(session,
         weight2 = [face_image_dict[pair[0].second.image_id][1] for pair in comp_pairs]
         embedding_second = np.dot(weight2,emb2)/np.sum(weight2)
 
-        mean_image = mean_image.append({'Comparison':x,'embedding1':embedding_first,'embedding2':embedding_second}, ignore_index = True)
+        y = comp_pairs[0][0].same
+
+        df_mean_image = df_mean_image.append({'Comparison':x,'embedding1':embedding_first,'embedding2':embedding_second, 'y':y}, ignore_index = True)
 
         #emb1 ,weigth2 = [face_image_dict[pair.second.image_id][0].embeddings, face_image_dict[pair.second.image_id][1] for pair in comp_pairs]
 
@@ -123,7 +125,7 @@ def get_valid_test_pairs_2015(session,
                         face_image_dict[pair[0].second.image_id][0], pair[1])
                         for pair in best_pairs]
     
-    return valid_test_pairs
+    return valid_test_pairs, df_mean_image
 
 # %% ../nbs/03_pairing.ipynb 7
 def get_valid_test_pairs(session, 
@@ -186,16 +188,19 @@ def get_test_pairs_per_category(session,
                                 quality_dropout):
 
     valid_test_pairs = []
+    df_pairs_2015 = None
+    
     enfsi_short = enfsi_years.copy()
     
     if 2015 in enfsi_years:
 
         enfsi_short.remove(2015)
-        valid_test_pairs += get_valid_test_pairs_2015(session,
+        valid_test_pairs, df_pairs_2015 = get_valid_test_pairs_2015(session,
                                             detector,
                                             embeddingModel,
                                             qualityModel,
                                             quality_dropout)
+        
         
     valid_test_pairs += get_valid_test_pairs(session,
                                             detector,
@@ -212,4 +217,4 @@ def get_test_pairs_per_category(session,
 
     for row_enfsi_pair, category in zip(valid_test_pairs, test_categories):
         test_pairs_per_category[category].append(row_enfsi_pair)
-    return test_pairs_per_category
+    return test_pairs_per_category, df_pairs_2015

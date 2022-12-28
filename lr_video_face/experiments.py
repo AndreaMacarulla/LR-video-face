@@ -99,7 +99,7 @@ class Experiment:
         self.create_output_dir()
 
         # Get test pairs per category.
-        test_pairs_per_category = get_test_pairs_per_category(self.session, 
+        test_pairs_per_category, df_pairs_2015 = get_test_pairs_per_category(self.session, 
                                                             self.image_filters, 
                                                             self.face_image_filters, 
                                                             self.detector, 
@@ -126,7 +126,7 @@ class Experiment:
                                                                         self.scorer,
                                                                         self.calibrator,
                                                                         calibration_pairs_per_category, 
-                                                                        test_pairs_per_category, 
+                                                                        test_pairs_per_category,
                                                                         self.session)
 
         # Predict LR
@@ -135,7 +135,8 @@ class Experiment:
                                 self.embedding_model_as_scorer,
                                 self.metrics,
                                 lr_systems, 
-                                test_pairs_per_category, 
+                                test_pairs_per_category,
+                                df_pairs_2015, 
                                 self.session)
 
         # todo: make necessary variables for graphs.
