@@ -244,9 +244,9 @@ def predict_lr(enfsi_years,
             results["quality_drops"] += quality_drops
 
             #Dataframe treatment
-            lrs_predicted_2015[category] = lr_systems[category].predict_lr(df_pairs_2015)
-            results["lrs_predicted_2015"] += list(lrs_predicted_2015[category])
-            results["y_test_2015"] += list(df_pairs_2015.y)
+            lrs_predicted_2015 = lr_systems[category].predict_lr(df_pairs_2015)
+            results["lrs_predicted_2015"] += list(lrs_predicted_2015)
+            results["y_test_2015"] += df_pairs_2015.y.astype(int).tolist()
 
         results['original_test_pairs'] = get_test_pairs(enfsi_years, session)
         

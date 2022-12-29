@@ -123,7 +123,7 @@ def get_valid_test_pairs_2015(session,
 
     valid_test_pairs = [(pair[0], face_image_dict[pair[0].first.image_id][0],\
                         face_image_dict[pair[0].second.image_id][0], pair[1])
-                        for pair in best_pairs]
+                        for pair in best_pairs] #(pair, emb1,emb2,quality_drop)
     
     return valid_test_pairs, df_mean_image
 

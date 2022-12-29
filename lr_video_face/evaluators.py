@@ -69,7 +69,12 @@ class ExperimentEvaluator:
         for key, values in results.items():
             drop_zero_results[key] = [value for value, dropout \
                                         in zip(values, dropouts)\
-                                        if dropout == 1]
+                                        if dropout == 1 ]
+
+        #incluimos las imagenes promedio como dropout = 1
+        for key in ["lrs_predicted_2015","y_test_2015"]:
+            drop_zero_results[key] = results[key] 
+            
         return drop_zero_results
 
     @staticmethod

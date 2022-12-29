@@ -6,8 +6,8 @@ __all__ = ['plot_lr_distributions', 'plot_ROC_curve', 'plot_tippett', 'plot_cllr
 # %% ../nbs/06_plots.ipynb 3
 from typing import Dict, List, Optional
 from sklearn.metrics import roc_curve
-from lir import Xy_to_Xn
-from lir.ece import plot
+from lir import Xy_to_Xn, metrics
+from lir.ece import plot 
 
 import os
 import numpy as np 
@@ -115,10 +115,21 @@ def plot_cllr(results:Dict, experiment_directory, enfsi_years: List[int], cllr_e
             {'Year': str(year), 'LR Estimator': embeddingModel, 'Cllr': cllr_auto},
             ignore_index=True)
 
+
     cllr_df = cllr_exp_df.append(cllr_auto_df)
+    #Cada LR estimator va en un color
+    paleta = ['orange', 'blue']
+
+    # añadimos el cllr de las imagen promediadas
+    if len(results['lrs_predicted_2015']):
+        x = metrics.cllr(np.asarray(results['lrs_predicted_2015']), np.asarray(results['y_test_2015']))    
+        cllr_df = cllr_df.append({'Year': str(2015), 'LR Estimator': 'Mean image pair', 'Cllr': x},
+            ignore_index=True)
+        paleta.append('yellow')
+
     sns.set_style("whitegrid")
     sc_plot = sns.catplot(data=cllr_df, x="Year", y="Cllr", hue="LR Estimator",
-                            palette=sns.color_palette(['orange', 'blue']))
+                            palette=sns.color_palette(paleta))
 
     # sc_plot.set_title("Cllrs for Automated system and ENFSI participants")
     # sc_plot.set(xticks=[map(str, years)])
