@@ -125,7 +125,7 @@ def plot_cllr(results:Dict, experiment_directory, enfsi_years: List[int], cllr_e
         x = metrics.cllr(np.asarray(results['lrs_predicted_2015']), np.asarray(results['y_test_2015']))    
         cllr_df = cllr_df.append({'Year': str(2015), 'LR Estimator': 'Mean image pair', 'Cllr': x},
             ignore_index=True)
-        paleta.append('yellow')
+        paleta.append('red')
 
     sns.set_style("whitegrid")
     sc_plot = sns.catplot(data=cllr_df, x="Year", y="Cllr", hue="LR Estimator",
@@ -147,20 +147,29 @@ def plot_ece(results:Dict, experiment_directory, save_plots:bool = True) -> obje
         plot(np.asarray(results["lrs_predicted"]), np.asarray(results["y_test"]), path=savefig, kw_figure={'figsize': (10, 10), 'dpi': 600})
 
 # %% ../nbs/06_plots.ipynb 11
-def plot_cllr_per_qualitydrop(cllrs_2015:Dict[float,float], 
+def plot_cllr_per_qualitydrop(cllrs_2015:Dict[float,float], cllr_expert_per_year,
 experiment_directory,
 save_plots:bool = True, 
 show: Optional[bool] = False):
     
-    df = pd.DataFrame.from_dict(cllrs_2015, orient='index', columns=['Cllr'])
-    df.reset_index(inplace = True)
+    df = pd.DataFrame.from_dict(cllrs_2015, orient='index', columns=['Cllr'])    
     
     df.rename(columns={'index': 'Quality Drop'}, inplace=True)
-    df = df.sort_values(by='Quality Drop')
+    #df = df.sort_values(by='Quality Drop')
+    df['legend'] = 'Automatic System'
+    
+    df.reset_index(inplace = True)
 
+    x1 = np.min(df['Quality Drop'])
+    x2 = np.max(df['Quality Drop'])
+    cllr_experts = np.mean(cllr_expert_per_year[2015].tolist())
+
+    df = df.append({'Quality Drop': x1, 'Cllr': cllr_experts, 'legend': 'Experts'}, ignore_index = True)
+    df = df.append({'Quality Drop': x2, 'Cllr': cllr_experts, 'legend': 'Experts'}, ignore_index = True)
+ 
     
     sns.set_style("whitegrid")
-    sc_plot = sns.lineplot(data=df, x='Quality Drop', y="Cllr", marker='s')
+    sc_plot = sns.lineplot(data=df, x='Quality Drop', y="Cllr", hue = 'legend', marker='s')
     sc_plot.set(xscale="log")
 
     sc_plot.set_title("Cllrs for Automated system and ENFSI year 2015 according to quality drop")

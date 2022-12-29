@@ -56,7 +56,7 @@ class ExperimentEvaluator:
             self.cllr_expert_per_year, self.cllr_auto_per_year, self.experiment.embeddingModel, self.save_plots)
 
         if 2015 in self.years:
-            plot_cllr_per_qualitydrop(self.cllrs_2015, self.experiment_directory, self.save_plots)
+            plot_cllr_per_qualitydrop(self.cllrs_2015, self.cllr_expert_per_year, self.experiment_directory, self.save_plots)
     
     
     
