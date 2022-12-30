@@ -123,7 +123,7 @@ def plot_cllr(results:Dict, experiment_directory, enfsi_years: List[int], cllr_e
     # añadimos el cllr de las imagen promediadas
     if len(results['lrs_predicted_2015']):
         x = metrics.cllr(np.asarray(results['lrs_predicted_2015']), np.asarray(results['y_test_2015']))    
-        cllr_df = cllr_df.append({'Year': str(2015), 'LR Estimator': 'Mean image pair', 'Cllr': x},
+        cllr_df = cllr_df.append({'Year': str(2015), 'LR Estimator': 'Quality weighted Images', 'Cllr': x},
             ignore_index=True)
         paleta.append('red')
 
@@ -153,20 +153,26 @@ save_plots:bool = True,
 show: Optional[bool] = False):
     
     df = pd.DataFrame.from_dict(cllrs_2015, orient='index', columns=['Cllr'])    
-    
+    df = df.reset_index(drop = False)
     df.rename(columns={'index': 'Quality Drop'}, inplace=True)
-    #df = df.sort_values(by='Quality Drop')
+    
     df['legend'] = 'Automatic System'
     
-    df.reset_index(inplace = True)
+    #df.reset_index(inplace = True)
+    # cllr es un valor promedio del error cometido en las observaciones. 
+    # como cada observador tiene el mismo número de observaciones, 
+    # el promedio global es igual al promedio de los valores obtenidos por cada observador.
+    cllr_experts = np.mean(cllr_expert_per_year[2015])
 
+    #para dibujar en la gráfica
     x1 = np.min(df['Quality Drop'])
-    x2 = np.max(df['Quality Drop'])
-    cllr_experts = np.mean(cllr_expert_per_year[2015].tolist())
+    x2 = np.max(df['Quality Drop'])    
 
     df = df.append({'Quality Drop': x1, 'Cllr': cllr_experts, 'legend': 'Experts'}, ignore_index = True)
     df = df.append({'Quality Drop': x2, 'Cllr': cllr_experts, 'legend': 'Experts'}, ignore_index = True)
- 
+
+    #hay que ordenar os datos para que no aparezcan leyendas múltiples
+    df.sort_values(by= ['legend', 'Quality Drop'], inplace = True)
     
     sns.set_style("whitegrid")
     sc_plot = sns.lineplot(data=df, x='Quality Drop', y="Cllr", hue = 'legend', marker='s')
