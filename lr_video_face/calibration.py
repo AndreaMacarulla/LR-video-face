@@ -213,6 +213,8 @@ def predict_lr(enfsi_years,
         results = defaultdict(list)
         lrs_predicted = {}
         lrs_predicted_2015 = {}
+
+        #pairs_per_category (pair,faceimage1,faceimage2,dropout,n_common_attributes)
         for category, row_test_pairs in test_pairs_per_category.items():
 
             pairs = [FacePair(row_test_pair[1], row_test_pair[2], row_test_pair[0].same) 
@@ -220,7 +222,8 @@ def predict_lr(enfsi_years,
 
             test_pairs = [row_test_pair[0] for row_test_pair in row_test_pairs]
 
-            quality_drops = [row_test_pair[-1] for row_test_pair in row_test_pairs]
+            quality_drops = [row_test_pair[3] for row_test_pair in row_test_pairs]
+            common_attributes = [row_test_pair[4] for row_test_pair in row_test_pairs]
 
             test_norm_distances = [pair.norm_distance for pair in pairs]
             test_dist_2015 = []
@@ -242,8 +245,9 @@ def predict_lr(enfsi_years,
             results["y_test"] += y_test
             results["test_norm_distances"] += test_norm_distances
             results["quality_drops"] += quality_drops
+            results["common_attributes"] += common_attributes
 
-            #Dataframe treatment
+            #Dataframe treatment for average image per comparison
             lrs_predicted_2015 = lr_systems[category].predict_lr(df_pairs_2015)
             results["lrs_predicted_2015"] += list(lrs_predicted_2015)
             results["y_test_2015"] += df_pairs_2015.y.astype(int).tolist()

@@ -59,6 +59,7 @@ def get_valid_test_pairs_2015(session,
         .filter(QualityImage.faceImage_id == FaceImage.faceImage_id) \
         .filter(QualityImage.qualityModel_id == qua_id).all()
 
+    # a cada image_id asociamos su (FaceImage,  quality)
     face_image_dict = defaultdict(Tuple)
     for row in query_face_img_id:
         face_image_dict[row[0]] = (row[1], row[2]) 
@@ -77,9 +78,9 @@ def get_valid_test_pairs_2015(session,
                 EnfsiPair2015.enfsiPair2015_id.in_(subquery_pair))
 
     
-    query = query_pair.all()
+    all_pairs = query_pair.all()
 
-    comparisons = list(set([enfsi_pair.comparison for enfsi_pair in query]))
+    comparisons = list(set([enfsi_pair.comparison for enfsi_pair in all_pairs]))
 
     best_pairs = []
 
@@ -89,8 +90,7 @@ def get_valid_test_pairs_2015(session,
     for x in comparisons:
 
         comp_pairs = [(pair, min(face_image_dict[pair.first.image_id][1], face_image_dict[pair.second.image_id][1])) \
-            for pair in query\
-            if pair.comparison == x]
+            for pair in all_pairs if pair.comparison == x]
 
         comp_pairs.sort(key=lambda x:x[1], reverse=True)
 
@@ -122,8 +122,8 @@ def get_valid_test_pairs_2015(session,
         
 
     valid_test_pairs = [(pair[0], face_image_dict[pair[0].first.image_id][0],\
-                        face_image_dict[pair[0].second.image_id][0], pair[1])
-                        for pair in best_pairs] #(pair, emb1,emb2,quality_drop)
+                        face_image_dict[pair[0].second.image_id][0], pair[1],pair[0].get_n_common_attributes())
+                        for pair in best_pairs] #(pair, emb1,emb2,quality_drop,n_common_attributes)
     
     return valid_test_pairs, df_mean_image
 
@@ -172,7 +172,7 @@ def get_valid_test_pairs(session,
 
     # The one at the end indicates all the pairs are chosen (see year 2015).
     valid_test_pairs = [(pair, face_image_dict[pair.first.image_id],\
-                        face_image_dict[pair.second.image_id], 1)
+                        face_image_dict[pair.second.image_id], 1, pair.get_n_common_attributes())
                         for pair in query]
     
     return valid_test_pairs
