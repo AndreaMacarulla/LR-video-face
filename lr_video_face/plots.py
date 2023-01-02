@@ -203,7 +203,7 @@ show: Optional[bool] = False):
     
     df0 = df0.loc[(df0['drop']==1)]
     df0 = df0.reset_index(drop = True)
-    df = pd.Dataframe()
+    df = pd.DataFrame()
 
     for n in np.unique(df0['common_attributes']):
         dfn = df0.loc[(df0['common_attributes'] == n)]
@@ -224,7 +224,7 @@ show: Optional[bool] = False):
     x2 = np.max(df['Common Attributes'])    
 
     df = df.append({'legend': 'Participants', 'Common Attributes': x1, 'Cllr': cllr_experts}, ignore_index = True)
-    df = df.append({'Common Attributes': x2, 'Cllr': cllr_experts, 'legend': 'Experts'}, ignore_index = True)
+    df = df.append({'legend': 'Participants', 'Common Attributes': x2, 'Cllr': cllr_experts}, ignore_index = True)
 
     #hay que ordenar os datos para que no aparezcan leyendas múltiples
     df.sort_values(by= ['legend', 'Common Attributes'], inplace = True)
