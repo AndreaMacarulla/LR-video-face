@@ -2,7 +2,7 @@
 
 # %% auto 0
 __all__ = ['plot_lr_distributions', 'plot_ROC_curve', 'plot_tippett', 'plot_cllr', 'plot_ece', 'plot_cllr_per_qualitydrop',
-           'plot_cllr_per_common_attributes']
+           'plot_cllr_per_common_attributes', 'plot_new']
 
 # %% ../nbs/06_plots.ipynb 3
 from typing import Dict, List, Optional
@@ -242,3 +242,80 @@ show: Optional[bool] = False):
         plt.close()
     if show:
         plt.show()
+
+# %% ../nbs/06_plots.ipynb 12
+from collections import defaultdict
+
+def plot_new(results:Dict, cllr_expert_per_year,
+experiment_directory,
+save_plots:bool = True, 
+show: Optional[bool] = False):    
+
+    # the results are only received for 2015
+    lrs_predicted = results["lrs_predicted"]
+    y_test = results["y_test"]
+    dropouts = results["quality_drops"]
+    common_attributes = results['common_attributes']
+
+    #get cllr per dropout
+
+    df_plot1 = pd.DataFrame()
+    for d in set(dropouts):
+        lr_d = [lr for lr,dropout in zip(lrs_predicted,dropouts) if dropout== d ]
+        y_d = [y for y,dropout in zip(y_test,dropouts) if dropout== d ]
+        cllr_d = metrics.cllr(np.asarray(lr_d), np.asarray(y_d))
+        df_plot1 = df_plot1.append({'dropout': d, 'Cllr': cllr_d},ignore_index = True)
+
+    df_plot1.sort_values(by= 'dropout', inplace = True)
+    
+
+    # get cllr per common attributes
+    # filter results when dropout = 1 
+    lrs = [lr for lr,drop in zip(lrs_predicted,dropouts) if drop== 1]
+    ys = [y for y,drop in zip(y_test,dropouts) if drop== 1]
+    comatt = [ca for ca,drop in zip(common_attributes,dropouts) if drop== 1]
+
+
+    df_plot2 = pd.DataFrame()
+    for c in set(comatt):
+        lr_c = [lr for lr,com in zip(lrs_predicted,comatt) if com== c ]
+        y_c = [y for y,comm in zip(ys,comatt) if comm== c ]
+        cllr_c = metrics.cllr(np.asarray(lr_c), np.asarray(y_c))
+        df_plot2 = df_plot2.append({'Common Attributes': c, 'Cllr': cllr_c},ignore_index = True)
+        
+    df_plot2.sort_values(by= 'Common Attributes', inplace = True)
+
+    # and plot with 2 different x scales
+
+    fig, ax1 = plt.subplots()
+
+    color = 'tab:red'
+    ax1.set_ylabel('Clly')
+    ax1.set_xlabel('Quality dropout', color = color)
+    sc_plot = ax1.plot('dropout','Cllr', data = df_plot1, color = color)
+    ax1.tick_params(axis ='x', labelcolor = color)
+
+    sc_plot.set(xscale="log")
+
+# Adding Twin Axes to plot using dataset_2
+    ax2 = ax1.twiny()
+
+    color = 'tab:green'
+    ax2.set_xlabel('# of common attributes', color = color)
+    ax2.plot('Common Attributes','Cllr', data = df_plot2, color = color)
+    ax2.tick_params(axis ='x', labelcolor = color)
+
+
+    plt.set_title("Cllrs per quality drop and number of common attributes")
+    # sc_plot.set(xticks=[map(str, years)])
+
+    if save_plots:
+        savefig = os.path.join(experiment_directory, "cllr_2015")
+        plt.savefig(savefig, dpi=600)
+        plt.close()
+    if show:
+        plt.show()
+
+    
+
+
