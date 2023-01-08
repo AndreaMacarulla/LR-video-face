@@ -87,6 +87,10 @@ class ExperimentEvaluator:
             results_2015[key] = [value for value, year \
                                         in zip(values, years)\
                                         if year == 2015]
+
+        #incluimos las imagenes promedio 
+        for key in ["lrs_predicted_2015","y_test_2015"]:
+            results_2015[key] = results[key] 
         return results_2015
 
 

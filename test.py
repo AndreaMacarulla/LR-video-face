@@ -13,17 +13,21 @@ fig, ax1 = plt.subplots()
 color = 'tab:red'
 ax1.set_xlabel('X-axis')
 ax1.set_ylabel('Y1-axis', color = color)
-ax1.plot(x, dataset_1, color = color)
-ax1.tick_params(axis ='y', labelcolor = color)
+ax1.plot(x, dataset_1, color = color,label = 'primera')
+ax1.tick_params(axis ='y', labelcolor = color )
 
+ax1.plot(np.nan, np.nan,  color = 'magenta', label = 'segunda bis')
+ax1.legend(loc = 'upper left')
 # Adding Twin Axes to plot using dataset_2
 ax2 = ax1.twinx()
 
 color = 'tab:green'
 ax2.set_ylabel('Y2-axis', color = color)
-ax2.plot(x, dataset_2, color = color)
-ax2.tick_params(axis ='y', labelcolor = color)
+ax2.plot(x, dataset_2, color = color, label = 'segunda')
 
+#ax2.set(yscale="log")
+ax2.tick_params(axis ='y', labelcolor = color )
+ax2.legend(loc = 'upper right')
 # Adding title
 plt.title('Use different y-axes on the left and right of a Matplotlib plot', fontweight ="bold")
 
