@@ -272,12 +272,14 @@ show: Optional[bool] = False):
         lr_d = [lr for lr,dropout in zip(lrs_predicted,dropouts) if dropout== d ]
         y_d = [y for y,dropout in zip(y_test,dropouts) if dropout== d ]
         cllr_d = metrics.cllr(np.asarray(lr_d), np.asarray(y_d))
-        df_plot1 = df_plot1.append({'dropout': d, 'Cllr': cllr_d},ignore_index = True)
+
+        #solo cambio en el momento de plotear
+        df_plot1 = df_plot1.append({'dropout': 100*(1-d), 'Cllr': cllr_d},ignore_index = True)
 
     df_plot1.sort_values(by= 'dropout', inplace = True)
     df_plot1.dropna(inplace= True)
 
-    xa,xb = min(dropouts),max(dropouts)
+    xa,xb = min(df_plot1.dropout),max(df_plot1.dropout)
 
     # get cllr per common attributes
     # filter results when dropout = 1 
@@ -302,8 +304,8 @@ show: Optional[bool] = False):
 
     color = 'tab:red'
     ax1.set_ylabel('Cllr')
-    ax1.set_xlabel('Quality dropout', color = color)
-    ax1.plot('dropout','Cllr', data = df_plot1, color = color, marker = 'o', label= 'Quality dropout')
+    ax1.set_xlabel('% of discarded pairs', color = color)
+    ax1.plot('dropout','Cllr', data = df_plot1, color = color, marker = 'o', label= 'Quality drop')
 
     # para engañar a la leyenda 1 metemos un punto de la segunda gráfica, para luego que luego no se vea
     
@@ -313,12 +315,12 @@ show: Optional[bool] = False):
    
     
 
-    ax1.set(xscale="log")
+    #ax1.set(xscale="log")
 
 # Adding Twin Axes to plot using dataset_2
     ax2 = ax1.twiny()
     color = 'tab:green'
-    ax2.set_xlabel('# of common attributes', color = color)
+    ax2.set_xlabel('number of common attributes', color = color)
 
     ax2.plot('Common Attributes','Cllr', data = df_plot2, color = color, marker= '^', label = "Matching attributes")
     # añadimos un plot nulo solo para que aparezca en la leyenda 1
@@ -327,8 +329,8 @@ show: Optional[bool] = False):
     ax2.tick_params(axis ='x', labelcolor = color)
 
         #añadimos los dos valores como rectas horizontales (ejes 1)
-    ax1.plot( [xa,xb],[cllr_avg,cllr_avg], label = 'Average Image', color = 'magenta')
-    ax1.plot( [xa,xb],[cllr_participants,cllr_participants], label = 'Participants', color = 'black')
+    ax1.plot( [xa,xb],[cllr_avg,cllr_avg], label = 'Average quality Image', color = 'magenta')
+    ax1.plot( [xa,xb],[cllr_participants,cllr_participants], label = 'Participants', linestyle= '--', color = 'black')
 
     #añadimos la leyenda 1 solo
     ax1.legend(loc = 'upper center')
