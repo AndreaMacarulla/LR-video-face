@@ -101,4 +101,5 @@ d = { 'settings': { 'branch': 'main',
                                      'lr_video_face.plots.plot_lr_distributions': ( 'plots.html#plot_lr_distributions',
                                                                                     'lr_video_face/plots.py'),
                                      'lr_video_face.plots.plot_new': ('plots.html#plot_new', 'lr_video_face/plots.py'),
-                                     'lr_video_face.plots.plot_tippett': ('plots.html#plot_tippett', 'lr_video_face/plots.py')}}}
+                                     'lr_video_face.plots.plot_tippett': ('plots.html#plot_tippett', 'lr_video_face/plots.py'),
+                                     'lr_video_face.plots.subplot_new': ('plots.html#subplot_new', 'lr_video_face/plots.py')}}}

@@ -216,3 +216,51 @@ class GlobalEvaluator:
         plt.savefig(savefig)
         plt.close() 
 
+        #Esto es lo nuevo
+
+        df0 = pd.DataFrame()
+        for evaluator in self.experiment_evaluators:
+
+            if isinstance(evaluator.experiment.calibrator, lir.IsotonicCalibrator):
+                calibrator_name = 'Isotonic Calibrator'
+            else:
+                calibrator_name = str(evaluator.experiment.calibrator)
+
+            df0 = df0.append({'Detector': evaluator.experiment.detector,
+                        'Embedding Model': evaluator.experiment.embeddingModel,
+                        'Quality Model': evaluator.experiment.qualityModel,
+                        'Calibrator': calibrator_name.split("(")[0],
+                        'Results': evaluator.results_2015,
+                        'Cllr': evaluator.cllr_expert_per_year[2015]}, ignore_index=True)
+        
+        df0.to_pickle('datos.pd', compression='infer', protocol=5, storage_options=None)
+        #pandas.read_pickle(filepath_or_buffer, compression='infer', storage_options=None)
+
+
+
+
+        if len(pd.unique(df0.Detector)) == 1 and len(pd.unique(df0.Calibrator)) == 1:
+
+            rows = list(pd.unique(df0['Embedding Model']))
+            cols = list(pd.unique(df0['Quality Model']))
+
+            #generamos la gráfica con subplots
+            fig,ax = plt.sublots(rows = len(rows), cols = len(cols))
+            
+            for index, df1 in df0.iterrows():
+
+                row = rows.index(df1['Embedding Model'])
+                col = cols.index(df1['Quality Model'])
+
+                ax1 = ax[row][col]
+                subplot_new(ax1,df1.Results, df1.Cllr)
+
+            savefig = os.path.join(self.experiments.output_dir, f"cllr_summary_ESX{self.experiments.embedding_model_as_scorer}")
+            plt.savefig(savefig)
+            plt.close() 
+
+
+
+               
+
+

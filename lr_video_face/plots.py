@@ -2,7 +2,7 @@
 
 # %% auto 0
 __all__ = ['plot_lr_distributions', 'plot_ROC_curve', 'plot_tippett', 'plot_cllr', 'plot_ece', 'plot_cllr_per_qualitydrop',
-           'plot_cllr_per_common_attributes', 'plot_new']
+           'plot_cllr_per_common_attributes', 'plot_new', 'subplot_new']
 
 # %% ../nbs/06_plots.ipynb 3
 from typing import Dict, List, Optional
@@ -244,12 +244,112 @@ show: Optional[bool] = False):
         plt.show()
 
 # %% ../nbs/06_plots.ipynb 12
-from collections import defaultdict
-
 def plot_new(results:Dict, cllr_expert_per_year,
 experiment_directory,
 save_plots:bool = True, 
 show: Optional[bool] = False):    
+
+    # the results are only received for 2015
+    lrs_predicted = results["lrs_predicted"]
+    y_test = results["y_test"]
+    dropouts = results["quality_drops"]
+    common_attributes = results['common_attributes']
+    
+    cllr_participants = np.mean(cllr_expert_per_year[2015])
+
+    # imagen promedio (17 comparisons)
+    lr_avg = results["lrs_predicted_2015"]
+    y_avg = results["y_test_2015"]    
+    
+    cllr_avg = metrics.cllr(np.asarray(lr_avg), np.asarray(y_avg)) 
+
+    #get cllr per dropout
+
+    df_plot1 = pd.DataFrame()
+    for d in set(dropouts):
+        lr_d = [lr for lr,dropout in zip(lrs_predicted,dropouts) if dropout== d ]
+        y_d = [y for y,dropout in zip(y_test,dropouts) if dropout== d ]
+        cllr_d = metrics.cllr(np.asarray(lr_d), np.asarray(y_d))
+
+        #solo cambio en el momento de plotear
+        df_plot1 = df_plot1.append({'dropout': 100*(1-d), 'Cllr': cllr_d},ignore_index = True)
+
+    df_plot1.sort_values(by= 'dropout', inplace = True)
+    df_plot1.dropna(inplace= True)
+
+    xa,xb = min(df_plot1.dropout),max(df_plot1.dropout)
+
+    # get cllr per common attributes
+    # filter results when dropout = 1 
+    lrs = [lr for lr,drop in zip(lrs_predicted,dropouts) if drop== 1]
+    ys = [y for y,drop in zip(y_test,dropouts) if drop== 1]
+    comatt = [ca for ca,drop in zip(common_attributes,dropouts) if drop== 1]
+
+
+    df_plot2 = pd.DataFrame()
+    for c in set(comatt):
+        lr_c = [lr for lr,com in zip(lrs,comatt) if com== c ]
+        y_c = [y for y,comm in zip(ys,comatt) if comm== c ]
+        cllr_c = metrics.cllr(np.asarray(lr_c), np.asarray(y_c))
+        df_plot2 = df_plot2.append({'Common Attributes': c, 'Cllr': cllr_c},ignore_index = True)
+        
+    df_plot2.sort_values(by= 'Common Attributes', inplace = True)
+    df_plot2.dropna(inplace= True)
+
+    # and plot with 2 different x scales
+
+    fig, ax1 = plt.subplots()
+
+    color = 'tab:red'
+    ax1.set_ylabel('Cllr')
+    ax1.set_xlabel('% of discarded pairs', color = color)
+    ax1.plot('dropout','Cllr', data = df_plot1, color = color, marker = 'o', label= 'Quality drop')
+
+    # para engañar a la leyenda 1 metemos un punto de la segunda gráfica, para luego que luego no se vea
+    
+
+
+    ax1.tick_params(axis ='x', labelcolor = color)
+   
+    
+
+    #ax1.set(xscale="log")
+
+# Adding Twin Axes to plot using dataset_2
+    ax2 = ax1.twiny()
+    color = 'tab:green'
+    ax2.set_xlabel('number of common attributes', color = color)
+
+    ax2.plot('Common Attributes','Cllr', data = df_plot2, color = color, marker= '^', label = "Matching attributes")
+    # añadimos un plot nulo solo para que aparezca en la leyenda 1
+    ax1.plot(np.nan,np.nan, color = color, marker = '^',label = "Matching attributes")
+    
+    ax2.tick_params(axis ='x', labelcolor = color)
+
+        #añadimos los dos valores como rectas horizontales (ejes 1)
+    ax1.plot( [xa,xb],[cllr_avg,cllr_avg], label = 'Average quality Image', color = 'magenta')
+    ax1.plot( [xa,xb],[cllr_participants,cllr_participants], label = 'Participants', linestyle= '--', color = 'black')
+
+    #añadimos la leyenda 1 solo
+    ax1.legend(loc = 'upper center')
+
+    plt.title("Cllrs per quality drop and number of common attributes")
+    # sc_plot.set(xticks=[map(str, years)])
+
+    if save_plots:
+        savefig = os.path.join(experiment_directory, "cllr_2015")
+        plt.savefig(savefig, dpi=600)
+        plt.show()
+        plt.close()
+    if show:
+        plt.show()
+
+    
+
+
+
+# %% ../nbs/06_plots.ipynb 13
+def subplot_new(ax1,results:Dict, cllr_expert_per_year):    
 
     # the results are only received for 2015
     lrs_predicted = results["lrs_predicted"]
