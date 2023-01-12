@@ -349,7 +349,7 @@ show: Optional[bool] = False):
 
 
 # %% ../nbs/06_plots.ipynb 13
-def subplot_new(ax1,results:Dict, cllr_expert_per_year):    
+def subplot_new(ax1,results:Dict, cllr_expert):    
 
     # the results are only received for 2015
     lrs_predicted = results["lrs_predicted"]
@@ -357,7 +357,7 @@ def subplot_new(ax1,results:Dict, cllr_expert_per_year):
     dropouts = results["quality_drops"]
     common_attributes = results['common_attributes']
     
-    cllr_participants = np.mean(cllr_expert_per_year[2015])
+    cllr_participants = np.mean(cllr_expert)
 
     # imagen promedio (17 comparisons)
     lr_avg = results["lrs_predicted_2015"]
@@ -400,7 +400,7 @@ def subplot_new(ax1,results:Dict, cllr_expert_per_year):
 
     # and plot with 2 different x scales
 
-    fig, ax1 = plt.subplots()
+    #fig, ax1 = plt.subplots()
 
     color = 'tab:red'
     ax1.set_ylabel('Cllr')
@@ -431,20 +431,13 @@ def subplot_new(ax1,results:Dict, cllr_expert_per_year):
         #añadimos los dos valores como rectas horizontales (ejes 1)
     ax1.plot( [xa,xb],[cllr_avg,cllr_avg], label = 'Average quality Image', color = 'magenta')
     ax1.plot( [xa,xb],[cllr_participants,cllr_participants], label = 'Participants', linestyle= '--', color = 'black')
+    ax1.plot( [xa,xb],[1,1], label = 'Random system', linestyle= ':', color = 'blue')
 
     #añadimos la leyenda 1 solo
     ax1.legend(loc = 'upper center')
 
-    plt.title("Cllrs per quality drop and number of common attributes")
+    # plt.title("Cllrs per quality drop and number of common attributes")
     # sc_plot.set(xticks=[map(str, years)])
-
-    if save_plots:
-        savefig = os.path.join(experiment_directory, "cllr_2015")
-        plt.savefig(savefig, dpi=600)
-        plt.show()
-        plt.close()
-    if show:
-        plt.show()
 
     
 

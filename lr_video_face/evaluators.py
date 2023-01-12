@@ -234,10 +234,8 @@ class GlobalEvaluator:
                         'Cllr': evaluator.cllr_expert_per_year[2015]}, ignore_index=True)
         
         df0.to_pickle('datos.pd', compression='infer', protocol=5, storage_options=None)
+        #Para ajustar el programa con datos grabados.
         #pandas.read_pickle(filepath_or_buffer, compression='infer', storage_options=None)
-
-
-
 
         if len(pd.unique(df0.Detector)) == 1 and len(pd.unique(df0.Calibrator)) == 1:
 
@@ -245,7 +243,7 @@ class GlobalEvaluator:
             cols = list(pd.unique(df0['Quality Model']))
 
             #generamos la gráfica con subplots
-            fig,ax = plt.sublots(rows = len(rows), cols = len(cols))
+            fig,ax = plt.subplots(nrows = len(rows), ncols = len(cols), squeeze= False, figsize= (16,14))
             
             for index, df1 in df0.iterrows():
 
@@ -254,13 +252,14 @@ class GlobalEvaluator:
 
                 ax1 = ax[row][col]
                 subplot_new(ax1,df1.Results, df1.Cllr)
+                ax1.set_title ( f"Quality Model: {df1['Quality Model']}")                
+                ax1.set(ylabel= f"Embedding Model: {df1['Embedding Model']}\n Cllr")
+            plt.suptitle('$C_{llr}$ Values')
+            fig.tight_layout()
+           
 
-            savefig = os.path.join(self.experiments.output_dir, f"cllr_summary_ESX{self.experiments.embedding_model_as_scorer}")
-            plt.savefig(savefig)
-            plt.close() 
-
-
-
-               
+            savefig = os.path.join(self.experiments.output_dir, f"cllr_summary_methods{self.experiments.embedding_model_as_scorer}")
+            plt.savefig(savefig, dpi= 600)
+            plt.close()                
 
 

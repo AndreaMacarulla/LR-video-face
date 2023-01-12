@@ -92,8 +92,8 @@ def get_valid_test_pairs_2015(session,
         comp_pairs = [(pair, min(face_image_dict[pair.first.image_id][1], face_image_dict[pair.second.image_id][1])) \
             for pair in all_pairs if pair.comparison == x]
 
+        
         comp_pairs.sort(key=lambda x:x[1], reverse=True)
-
         qua_pairs = [comp_pair[0] for comp_pair in comp_pairs]
 
         for dropout in quality_dropouts:
