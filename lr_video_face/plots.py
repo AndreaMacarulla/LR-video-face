@@ -330,9 +330,12 @@ show: Optional[bool] = False):
     ax1.plot( [xa,xb],[cllr_avg,cllr_avg], label = 'Average quality Image', color = 'magenta')
     ax1.plot( [xa,xb],[cllr_participants,cllr_participants], label = 'Participants', linestyle= '--', color = 'black')
 
-    #añadimos la leyenda 1 solo
-    ax1.legend(loc = 'upper center')
 
+    #añadimos la leyenda 1 solo
+    #ax1.legend(loc = 'lower center')
+    ax1.legend(bbox_to_anchor=(.5, .2))
+
+    
     plt.title("Cllrs per quality drop and number of common attributes")
     # sc_plot.set(xticks=[map(str, years)])
 
@@ -429,16 +432,25 @@ def subplot_new(ax1,results:Dict, cllr_expert):
     ax2.plot('Common Attributes','Cllr', data = df_plot2, color = color, marker= '^', label = "Matching attributes")
     # añadimos un plot nulo solo para que aparezca en la leyenda 1
     ax1.plot(np.nan,np.nan, color = color, marker = '^',label = "Matching attributes")
+
+ 
     
-    ax2.tick_params(axis ='x', labelcolor = color)
+    #ax2.tick_params(axis ='x', labelcolor = color)
 
         #añadimos los dos valores como rectas horizontales (ejes 1)
     ax1.plot( [xa,xb],[cllr_avg,cllr_avg], label = 'Average quality Image', color = 'magenta')
     ax1.plot( [xa,xb],[cllr_participants,cllr_participants], label = 'Participants', linestyle= '--', color = 'black')
     ax1.plot( [xa,xb],[1,1], label = 'Random system', linestyle= ':', color = 'blue')
 
+    #plots nulos para que aparezcan en la leyebda 2 y la global.
+    ax2.plot(np.nan,np.nan,  label= 'Quality drop', color = 'red', marker = 'o')
+    ax2.plot(np.nan,np.nan, label = 'Average quality Image', color = 'magenta')
+    ax2.plot(np.nan,np.nan, label = 'Participants', linestyle= '--', color = 'black')
+    ax2.plot(np.nan,np.nan, label = 'Random system', linestyle= ':', color = 'blue')
+
     #añadimos la leyenda 1 solo
-    ax1.legend(loc = 'upper center')
+    #ax1.legend(loc = 'lower center')
+    #ax1.legend(bbox_to_anchor=(.5, .2))
 
     # plt.title("Cllrs per quality drop and number of common attributes")
     # sc_plot.set(xticks=[map(str, years)])
