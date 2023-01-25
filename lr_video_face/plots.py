@@ -405,7 +405,11 @@ def subplot_new(ax1,results:Dict, cllr_expert):
     color = 'tab:red'
     ax1.set_ylabel('Cllr')
     ax1.set_xlabel('% of discarded pairs', color = color)
-    ax1.plot('dropout','Cllr', data = df_plot1, color = color, marker = 'o', label= 'Quality drop')
+    ax1.plot('dropout','Cllr', data = df_plot1, color = color, marker = 'o', label= 'Quality based drop')
+
+    df_0drop = df_plot1.loc[(df_plot1['dropout'] == 0)]
+    ax1.plot('dropout','Cllr', data = df_0drop, color = color, marker = '*', label= 'Pairing all frames')
+
 
     # para engañar a la leyenda 1 metemos un punto de la segunda gráfica, para luego que luego no se vea
     
