@@ -6,6 +6,7 @@ __all__ = ['make_cal_face_pairs', 'get_filtered_images', 'get_calibration_pairs_
 
 # %% ../nbs/04_calibration.ipynb 3
 import numpy as np
+import pandas as pd
 
 from typing import List, Union
 from collections import defaultdict
@@ -165,13 +166,16 @@ def generate_lr_systems(embeddingModel,
                         test_pairs_per_category, 
                         session
                         ):
-
+        
+        
+        df0 = pd.DataFrame()
         lr_systems = {}
         for category, pairs in calibration_pairs_per_category.items():
             y_cal = np.asarray([int(pair.same_identity) for pair in pairs]).flatten()
 
             if embedding_model_as_scorer:
                 X_cal = pairs
+                scores = np.reshape(np.asarray([pair.norm_distance   for pair in pairs]),(-1,1))
 
             else:
 
@@ -182,6 +186,10 @@ def generate_lr_systems(embeddingModel,
                     # todo: check if normalizing is necessary.
                     cal_distances = [pair.distance(metrics) for pair in pairs]
                     X_cal = np.reshape(np.asarray(cal_distances), (-1, 1))
+
+                scores = X_cal
+
+            df0 = df0.append({'Category':category, 'Scores': scores, 'Y calibration': y_cal}, ignore_index = True)
 
             # Fit
             if 0 < np.sum(y_cal) < len(pairs):
@@ -194,6 +202,9 @@ def generate_lr_systems(embeddingModel,
             else:
                 del test_pairs_per_category[category]
 
+        df0.to_pickle('./Calibration.cpd')
+
+        
         if len(lr_systems.keys()) == 0:
             return None
 
@@ -237,6 +248,8 @@ def predict_lr(enfsi_years,
                 else:
                     test_distances = [pair.distance(metrics) for pair in pairs]
                     X_test = np.reshape(np.asarray(test_distances), (-1, 1))
+
+            
 
             lrs_predicted[category] = lr_systems[category].predict_lr(X_test)
             y_test = [int(pair.same_identity) for pair in pairs]

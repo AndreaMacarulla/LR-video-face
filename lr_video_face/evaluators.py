@@ -232,8 +232,9 @@ class GlobalEvaluator:
                         'Calibrator': calibrator_name.split("(")[0],
                         'Results': evaluator.results_2015,
                         'Cllr': evaluator.cllr_expert_per_year[2015]}, ignore_index=True)
-        
-        df0.to_pickle('datos.pd', compression='infer', protocol=5, storage_options=None)
+                        
+        datosgraph = os.path.join(self.experiments.output_dir,'datosgraph.pd')
+        df0.to_pickle(datosgraph, compression='infer', protocol=5, storage_options=None)
         #Para ajustar el programa con datos grabados.
         #pandas.read_pickle(filepath_or_buffer, compression='infer', storage_options=None)
 

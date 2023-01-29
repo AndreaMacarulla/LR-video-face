@@ -411,7 +411,7 @@ def subplot_new(ax1,results:Dict, cllr_expert):
     ax1.plot('dropout','Cllr', data = df_plot1, color = color, marker = 'o', label= 'Quality based drop')
 
     df_0drop = df_plot1.loc[(df_plot1['dropout'] == 0)]
-    ax1.plot('dropout','Cllr', data = df_0drop, color = color, marker = '*', label= 'Pairing all frames')
+    ax1.scatter('dropout','Cllr', data = df_0drop, color = 'blue', marker = 's', s=[80],  label= 'Pairing all frames')
 
 
     # para engañar a la leyenda 1 metemos un punto de la segunda gráfica, para luego que luego no se vea
@@ -438,15 +438,17 @@ def subplot_new(ax1,results:Dict, cllr_expert):
     #ax2.tick_params(axis ='x', labelcolor = color)
 
         #añadimos los dos valores como rectas horizontales (ejes 1)
-    ax1.plot( [xa,xb],[cllr_avg,cllr_avg], label = 'Average quality Image', color = 'magenta')
+    ax1.plot( [xa,xb],[cllr_avg,cllr_avg], label = 'Weighted quality image', color = 'magenta')
     ax1.plot( [xa,xb],[cllr_participants,cllr_participants], label = 'Participants', linestyle= '--', color = 'black')
     ax1.plot( [xa,xb],[1,1], label = 'Random system', linestyle= ':', color = 'blue')
 
-    #plots nulos para que aparezcan en la leyebda 2 y la global.
-    ax2.plot(np.nan,np.nan,  label= 'Quality drop', color = 'red', marker = 'o')
-    ax2.plot(np.nan,np.nan, label = 'Average quality Image', color = 'magenta')
+    #plots nulos para que aparezcan en la leyenda 2 y la global.
+    ax2.plot(np.nan,np.nan,  label= 'Quality based drop', color = 'red', marker = 'o')
+    ax2.scatter(np.nan,np.nan, color = 'blue', marker = 's',  label= 'Pairing all frames')
+    ax2.plot(np.nan,np.nan, label = 'Weighted quality image', color = 'magenta')
     ax2.plot(np.nan,np.nan, label = 'Participants', linestyle= '--', color = 'black')
     ax2.plot(np.nan,np.nan, label = 'Random system', linestyle= ':', color = 'blue')
+    
 
     #añadimos la leyenda 1 solo
     #ax1.legend(loc = 'lower center')
