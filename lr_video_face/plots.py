@@ -464,7 +464,6 @@ def subplot_new(ax1,results:Dict, cllr_expert):
     x = ax1.boxplot(df_plot1['Cllr2'])
 
     
-
     df_0drop = df_plot1.loc[(df_plot1['dropout'] == 0)]
     ax1.scatter('dropout','Cllr', data = df_0drop, color = 'blue', marker = 's', s=[80],  label= 'Pairing all frames')
 
