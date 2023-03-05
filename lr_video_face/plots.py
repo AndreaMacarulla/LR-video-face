@@ -461,8 +461,8 @@ def subplot_new(ax1,results:Dict, cllr_expert):
     ax1.set_ylabel('Cllr')
     ax1.set_xlabel('% of discarded pairs', color = color)
     
-    ax1.boxplot(df_plot1['Cllr2'],positions=df_plot1['dropout'],sym='',notch = True,manage_ticks = False, whis= 0, labels=df_plot1['dropout'])
-    #ax1.plot('dropout','Cllr', data = df_plot1, color = color, marker = 'o', label= 'Quality based drop')
+    ax1.boxplot(df_plot1['Cllr2'],positions=df_plot1['dropout'],sym='',notch = True,manage_ticks = True,width=0.3, whis= 0, labels=df_plot1['dropout'])
+    ax1.plot('dropout','Cllr', data = df_plot1, color = color, marker = 'o', label= 'Quality based drop')
 
     
     df_0drop = df_plot1.loc[(df_plot1['dropout'] == 0)]
