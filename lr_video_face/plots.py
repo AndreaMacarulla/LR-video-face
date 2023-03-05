@@ -2,7 +2,7 @@
 
 # %% auto 0
 __all__ = ['plot_lr_distributions', 'plot_ROC_curve', 'plot_tippett', 'plot_cllr', 'plot_ece', 'plot_cllr_per_qualitydrop',
-           'plot_cllr_per_common_attributes', 'plot_new', 'subplot_new']
+           'plot_cllr_per_common_attributes', 'plot_new', 'cllr_new', 'subplot_new']
 
 # %% ../nbs/06_plots.ipynb 3
 from typing import Dict, List, Optional
@@ -28,9 +28,13 @@ def plot_lr_distributions(results:Dict, experiment_directory, save_plots:bool = 
     points0, points1 = Xy_to_Xn(predicted_log_lrs, np.array(results['y_test']))
     plt.hist(points0, bins=20, alpha=.25, density=True)
     plt.hist(points1, bins=20, alpha=.25, density=True)
-    plt.xlabel(r'$log_{10}$ LR')
+    plt.xticks(fontsize = 22)
+    plt.yticks(fontsize = 22)
+    plt.xlabel(r'$log_{10}$ LR',size = 24)
+    plt.ylabel('Density',size = 24)
+    
     if save_plots:
-        savefig = os.path.join(experiment_directory, "lr_distributions")
+        savefig = os.path.join(experiment_directory, "lr_distributions3")
         plt.savefig(savefig, dpi=600)
         plt.close()
     if show:
@@ -270,6 +274,7 @@ show: Optional[bool] = False):
         lr_d = [lr for lr,dropout in zip(lrs_predicted,dropouts) if dropout== d ]
         y_d = [y for y,dropout in zip(y_test,dropouts) if dropout== d ]
         cllr_d = metrics.cllr(np.asarray(lr_d), np.asarray(y_d))
+        
 
         #solo cambio en el momento de plotear
         df_plot1 = df_plot1.append({'dropout': 100*(1-d), 'Cllr': cllr_d},ignore_index = True)
@@ -342,7 +347,7 @@ show: Optional[bool] = False):
     if save_plots:
         savefig = os.path.join(experiment_directory, "cllr_2015")
         plt.savefig(savefig, dpi=600)
-        plt.show()
+        #plt.show()
         plt.close()
     if show:
         plt.show()
@@ -351,7 +356,50 @@ show: Optional[bool] = False):
 
 
 
-# %% ../nbs/06_plots.ipynb 13
+# %% ../nbs/06_plots.ipynb 14
+def cllr_new(lrs, y, weights=(1, 1)):
+    """
+    Calculates a log likelihood ratio cost (C_llr) for a series of likelihood
+    ratios.
+
+    Nico Brümmer and Johan du Preez, Application-independent evaluation of speaker detection, In: Computer Speech and
+    Language 20(2-3), 2006.
+
+    Parameters
+    ----------
+    lrs : a numpy array of LRs
+    y : a numpy array of labels (0 or 1)
+
+    Returns
+    -------
+    cllr
+        the log likelihood ratio cost
+    """
+
+    # ignore errors:
+    #   divide -> ignore divide by zero
+    #   over -> ignore scalar overflow
+    
+    #normalizamos pesos
+    #weights = weights/sum(weights)
+
+    with np.errstate(divide='ignore', over='ignore'):
+        lrs0, lrs1 = Xy_to_Xn(lrs, y) 
+        cllr0_l =  np.log2(1 + lrs0) if weights[0] > 0 else np.empty()
+        cllr1_l =  np.log2(1 + 1 / lrs1) if weights[1] > 0 else np.empty()
+
+        cllr0 = weights[0] * np.mean(cllr0_l) if weights[0] > 0 else 0
+        cllr1 = weights[1] * np.mean(cllr1_l) if weights[1] > 0 else 0
+
+        #devolvemos cllr y la lista de valores que lo forman
+        return ((cllr0+cllr1)/sum(weights),np.concatenate((cllr0_l,cllr1_l)))
+
+        #cllr0 = weights[0] * np.mean(np.log2(1 + lrs0)) if weights[0] > 0 else 0
+        #cllr1 = weights[1] * np.mean(np.log2(1 + 1 / lrs1)) if weights[1] > 0 else 0
+        #return (cllr0 + cllr1) / sum(weights)
+
+
+# %% ../nbs/06_plots.ipynb 16
 def subplot_new(ax1,results:Dict, cllr_expert):    
 
     # the results are only received for 2015
@@ -376,8 +424,12 @@ def subplot_new(ax1,results:Dict, cllr_expert):
         y_d = [y for y,dropout in zip(y_test,dropouts) if dropout== d ]
         cllr_d = metrics.cllr(np.asarray(lr_d), np.asarray(y_d))
 
+        cllr_d1,cllr_d2 = cllr_new(np.asarray(lr_d), np.asarray(y_d))
+
         #solo cambio en el momento de plotear
-        df_plot1 = df_plot1.append({'dropout': 100*(1-d), 'Cllr': cllr_d},ignore_index = True)
+        df_plot1 = df_plot1.append({'dropout': 100*(1-d), 'Cllr': cllr_d1,'Cllr2': cllr_d2},ignore_index = True)
+        
+
 
     df_plot1.sort_values(by= 'dropout', inplace = True)
     df_plot1.dropna(inplace= True)
@@ -408,7 +460,8 @@ def subplot_new(ax1,results:Dict, cllr_expert):
     color = 'tab:red'
     ax1.set_ylabel('Cllr')
     ax1.set_xlabel('% of discarded pairs', color = color)
-    ax1.plot('dropout','Cllr', data = df_plot1, color = color, marker = 'o', label= 'Quality based drop')
+    #ax1.plot('dropout','Cllr', data = df_plot1, color = color, marker = 'o', label= 'Quality based drop')
+    x = ax1.boxplot('dropout','Cllr2', data = df_plot1)
 
     df_0drop = df_plot1.loc[(df_plot1['dropout'] == 0)]
     ax1.scatter('dropout','Cllr', data = df_0drop, color = 'blue', marker = 's', s=[80],  label= 'Pairing all frames')
@@ -418,7 +471,7 @@ def subplot_new(ax1,results:Dict, cllr_expert):
     
 
 
-    ax1.tick_params(axis ='x', labelcolor = color)
+    ax1.tick_params(axis ='x', labelcolor = color,size = 16)
    
     
 
@@ -427,7 +480,8 @@ def subplot_new(ax1,results:Dict, cllr_expert):
 # Adding Twin Axes to plot using dataset_2
     ax2 = ax1.twiny()
     color = 'tab:green'
-    ax2.set_xlabel('number of common attributes', color = color)
+    ax2.set_xlabel('number of common attributes', color = color,fontsize = 14)
+    ax2.set_xticks(range(0,7),  fontsize = 16)
 
     ax2.plot('Common Attributes','Cllr', data = df_plot2, color = color, marker= '^', label = "Matching attributes")
     # añadimos un plot nulo solo para que aparezca en la leyenda 1

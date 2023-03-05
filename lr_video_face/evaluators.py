@@ -48,6 +48,9 @@ class ExperimentEvaluator:
     def make_plots(self):
         #if 2015 in self.experiment.enfsi_years:
 
+        df = pd.DataFrame({'Results':self.drop_zero_results})
+        df.to_pickle(os.path.join(self.experiment_directory,'drop_zero_results.pd'))
+
         plot_lr_distributions(self.drop_zero_results, self.experiment_directory, self.save_plots)
         plot_ROC_curve(self.drop_zero_results, self.experiment_directory, self.save_plots)
         plot_tippett(self.drop_zero_results, self.experiment_directory, self.save_plots)
