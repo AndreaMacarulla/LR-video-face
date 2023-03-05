@@ -427,7 +427,7 @@ def subplot_new(ax1,results:Dict, cllr_expert):
         cllr_d1,cllr_d2 = cllr_new(np.asarray(lr_d), np.asarray(y_d))
 
         #solo cambio en el momento de plotear
-        df_plot1 = df_plot1.append({'dropout': 100*(1-d), 'Cllr': cllr_d1,'Cllr2': cllr_d2},ignore_index = True)
+        df_plot1 = df_plot1.append({'dropout': int(100*(1-d)), 'Cllr': cllr_d1,'Cllr2': cllr_d2},ignore_index = True)
         
 
 
