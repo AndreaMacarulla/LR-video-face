@@ -433,7 +433,8 @@ def subplot_new(ax1,results:Dict, cllr_expert):
 
         cllr_d1,cllr_d2 = cllr_new(np.asarray(lr_d), np.asarray(y_d))
 
-        spamwriter.writerow(cllr_d1,np.percentile(cllr_d2,[25,50,75]))
+        spamwriter.writerow(f'{cllr_d1};{np.percentile(cllr_d2,[25,50,75])}')
+        
         print(cllr_d1,np.percentile(cllr_d2,[25,50,75]))
 
         #solo cambio en el momento de plotear
