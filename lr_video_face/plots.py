@@ -400,6 +400,9 @@ def cllr_new(lrs, y, weights=(1, 1)):
 
 
 # %% ../nbs/06_plots.ipynb 16
+import csv
+import datetime
+
 def subplot_new(ax1,results:Dict, cllr_expert):    
 
     # the results are only received for 2015
@@ -417,6 +420,10 @@ def subplot_new(ax1,results:Dict, cllr_expert):
     cllr_avg = metrics.cllr(np.asarray(lr_avg), np.asarray(y_avg)) 
 
     #get cllr per dropout
+    with open('eggs.csv', 'w', newline='') as csvfile:
+        spamwriter = csv.writer(csvfile, delimiter= '\t')
+    
+
 
     df_plot1 = pd.DataFrame()
     for d in set(dropouts):
@@ -426,6 +433,7 @@ def subplot_new(ax1,results:Dict, cllr_expert):
 
         cllr_d1,cllr_d2 = cllr_new(np.asarray(lr_d), np.asarray(y_d))
 
+        spamwriter.writerow(cllr_d1,np.percentile(cllr_d2,[25,50,75]))
         print(cllr_d1,np.percentile(cllr_d2,[25,50,75]))
 
         #solo cambio en el momento de plotear
