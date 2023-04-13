@@ -400,9 +400,6 @@ def cllr_new(lrs, y, weights=(1, 1)):
 
 
 # %% ../nbs/06_plots.ipynb 16
-import csv
-import datetime
-
 def subplot_new(ax1,results:Dict, cllr_expert):    
 
     # the results are only received for 2015
@@ -420,8 +417,7 @@ def subplot_new(ax1,results:Dict, cllr_expert):
     cllr_avg = metrics.cllr(np.asarray(lr_avg), np.asarray(y_avg)) 
 
     #get cllr per dropout
-    with open('eggs.csv', 'w', newline='') as csvfile:
-        spamwriter = csv.writer(csvfile, delimiter= '\t')
+
     
 
 
@@ -432,14 +428,12 @@ def subplot_new(ax1,results:Dict, cllr_expert):
         cllr_d = metrics.cllr(np.asarray(lr_d), np.asarray(y_d))
 
         cllr_d1,cllr_d2 = cllr_new(np.asarray(lr_d), np.asarray(y_d))
-
-        spamwriter.writerow(f'{cllr_d1};{np.percentile(cllr_d2,[25,50,75])}')
         
         print(cllr_d1,np.percentile(cllr_d2,[25,50,75]))
 
         #solo cambio en el momento de plotear
         df_plot1 = df_plot1.append({'dropout': round(100*(1-d)), 'Cllr': cllr_d1,'Cllr2': cllr_d2},ignore_index = True)
-        
+    
 
 
     df_plot1.sort_values(by= 'dropout', inplace = True)
@@ -474,7 +468,7 @@ def subplot_new(ax1,results:Dict, cllr_expert):
     ax1.set_ylabel('Cllr')
     ax1.set_xlabel('% of discarded pairs', color = color)
     
-    ax1.boxplot(df_plot1['Cllr2'],positions=df_plot1['dropout'],sym='',notch = True, manage_ticks = True, whis= 0, widths=1.2, labels=df_plot1['dropout'])
+    ax1.boxplot(df_plot1['Cllr2'],positions=df_plot1['dropout'],sym='',notch = True, manage_ticks = True, whis= 0, widths=2, labels=df_plot1['dropout'])
     ax1.plot('dropout','Cllr', data = df_plot1, color = color, marker = 'o', label= 'Quality based drop')
 
     
