@@ -7,6 +7,7 @@ __all__ = ['Experiment', 'ExperimentalSetup']
 import os
 import lir
 import numpy as np
+from itertools import chain
 
 from sklearn.base import BaseEstimator
 from sklearn.linear_model import LogisticRegression
@@ -41,8 +42,9 @@ class Experiment:
         calibrator: BaseEstimator,
         calibration_db: List[str],
         enfsi_years: List[int],
-        image_filters: List[str],        
-        face_image_filters: List[str],
+        filters: dict,
+        # image_filters: List[str],        
+        # face_image_filters: List[str],
         # quality_filters: List[str],
         metrics: str,
         n_calibration_pairs: int,
@@ -60,9 +62,12 @@ class Experiment:
         self.calibrator = calibrator
         self.calibration_db = calibration_db
         self.enfsi_years = enfsi_years
-        self.image_filters = image_filters
-        self.face_image_filters = face_image_filters
-        # self.quality_filters = quality_filters
+        #new
+        #self.image_filters = filters['image']
+        #self.face_image_filters = filters['face_image']
+        #self.quality_filters = filters['quality']
+        self.filters = filters
+
         self.metrics = metrics
         self.n_calibration_pairs = n_calibration_pairs
         self.embedding_model_as_scorer = embedding_model_as_scorer
@@ -100,8 +105,11 @@ class Experiment:
 
         # Get test pairs per category.
         test_pairs_per_category, df_pairs_2015 = get_test_pairs_per_category(self.session, 
-                                                            self.image_filters, 
-                                                            self.face_image_filters, 
+                                                            #new                 
+                                                            #self.image_filters, 
+                                                            #self.face_image_filters, 
+                                                            self.filters,
+
                                                             self.detector, 
                                                             self.embeddingModel,
                                                             self.qualityModel,
@@ -109,9 +117,12 @@ class Experiment:
                                                             self.quality_dropout)
         # Get calibration pair per category.
         calibration_pairs_per_category = get_calibration_pairs_per_category(test_pairs_per_category.keys(),
-                                                                            self.image_filters, 
-                                                                            self.face_image_filters,
+                                                                            #new
+                                                                            #self.image_filters, 
+                                                                            #self.face_image_filters,
                                                                             # self.quality_filters,
+                                                                            self.filters,
+
                                                                             self.detector,
                                                                             self.embeddingModel,
                                                                             # self.qualityModel,
@@ -157,6 +168,10 @@ class Experiment:
         for k, v in self.data_config.items():
             if k == 'datasets' and isinstance(v, tuple):
                 data_values.append('|'.join(map(str, v)))
+
+            elif k == 'filters':  
+                #todo: crear string con los filtros  
+                a=0
             else:
                 data_values.append(str(v))
 
@@ -178,8 +193,10 @@ class ExperimentalSetup:
                 calibrator_names, 
                 calibration_db, 
                 enfsi_years, 
-                image_filters, 
-                face_image_filters,
+                #new
+                #image_filters, 
+                #face_image_filters,
+                filters,
                 metrics, 
                 n_calibration_pairs, 
                 embedding_model_as_scorer,
@@ -195,9 +212,11 @@ class ExperimentalSetup:
         self.calibrators = self._get_calibrators(calibrator_names)
         self.calibration_db = calibration_db
         self.enfsi_years = enfsi_years
-        self.image_filters = image_filters
-        self.face_image_filters = face_image_filters
+        #new
+        # self.image_filters = image_filters
+        # self.face_image_filters = face_image_filters
         # self.quality_filters = quality_filters 
+        self.filters = filters,
         self.metrics = metrics
         self.n_calibration_pairs = n_calibration_pairs
         self.embedding_model_as_scorer = embedding_model_as_scorer
@@ -232,8 +251,11 @@ class ExperimentalSetup:
 
     
     def _get_directory(self):
-        filters = self.image_filters + self.face_image_filters # + self.quality_filters
-        subfolder = f'[{",".join(filters)}]'
+        #filters = self.image_filters + self.face_image_filters # + self.quality_filters
+        
+        filterlist = list(chain.from_iterable(self.filters.values()))
+
+        subfolder = f'[{",".join(filterlist)}]'
         folder = f'C_({self.n_calibration_pairs})_[{",".join(self.calibration_db)}]_T_[{",".join([str(year) for year in self.enfsi_years])}]'
         return os.path.join(folder, subfolder)
 
