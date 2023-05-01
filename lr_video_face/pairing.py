@@ -208,7 +208,7 @@ def get_test_pairs_per_category(session,
     valid_test_pairs += get_valid_test_pairs(session,
                                             detector,
                                             embeddingModel,
-                                            qualityModel,
+                                            #qualityModel,
                                             enfsi_short) 
     #quitado para 2015
     
