@@ -214,7 +214,7 @@ def get_test_pairs_per_category(session,
     
 
     test_categories = [
-        row[0].get_category(session, filters, detector, embeddingModel, qualityModel)
+        row[0].get_category(session, filters[0], detector, embeddingModel, qualityModel)
         #row[0].get_category(image_filters, face_image_filters, detector, embeddingModel)
         for row in valid_test_pairs]
 
