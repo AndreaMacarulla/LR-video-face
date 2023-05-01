@@ -179,8 +179,11 @@ def get_valid_test_pairs(session,
 
 # %% ../nbs/03_pairing.ipynb 8
 def get_test_pairs_per_category(session,
-                                image_filters,
-                                face_image_filters,
+                                #new
+                                #image_filters,
+                                #face_image_filters,
+                                filters,
+
                                 detector,
                                 embeddingModel,
                                 qualityModel,
@@ -205,12 +208,14 @@ def get_test_pairs_per_category(session,
     valid_test_pairs += get_valid_test_pairs(session,
                                             detector,
                                             embeddingModel,
+                                            qualityModel,
                                             enfsi_short) 
     #quitado para 2015
     
 
     test_categories = [
-        row[0].get_category(image_filters, face_image_filters, detector, embeddingModel)
+        row[0].get_category(session, filters, detector, embeddingModel, qualityModel)
+        #row[0].get_category(image_filters, face_image_filters, detector, embeddingModel)
         for row in valid_test_pairs]
 
     test_pairs_per_category = defaultdict(list)

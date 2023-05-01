@@ -125,7 +125,6 @@ class Experiment:
 
                                                                             self.detector,
                                                                             self.embeddingModel,
-                                                                            # self.qualityModel,
                                                                             self.calibration_db,
                                                                             self.n_calibration_pairs,
                                                                             self.session)
