@@ -212,6 +212,8 @@ def get_test_pairs_per_category(session,
                                             enfsi_short) 
     #quitado para 2015
     
+    #rem: quito unos pocos para ir rápido en el debug
+    valid_test_pairs = valid_test_pairs[:5000]
 
     test_categories = [
         row[0].get_category(session, filters[0], detector, embeddingModel, qualityModel)
