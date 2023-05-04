@@ -195,9 +195,6 @@ class ExperimentalSetup:
                 calibrator_names, 
                 calibration_db, 
                 enfsi_years, 
-                #new
-                #image_filters, 
-                #face_image_filters,
                 filters,
                 metrics, 
                 n_calibration_pairs, 
@@ -214,10 +211,6 @@ class ExperimentalSetup:
         self.calibrators = self._get_calibrators(calibrator_names)
         self.calibration_db = calibration_db
         self.enfsi_years = enfsi_years
-        #new
-        # self.image_filters = image_filters
-        # self.face_image_filters = face_image_filters
-        # self.quality_filters = quality_filters 
         self.filters = filters
         self.metrics = metrics
         self.n_calibration_pairs = n_calibration_pairs
@@ -323,9 +316,6 @@ class ExperimentalSetup:
                             calibrator,
                             self.calibration_db,
                             self.enfsi_years,
-                            #new
-                            #self.image_filters,
-                            #self.face_image_filters,
                             self.filters,
                             self.metrics,
                             self.n_calibration_pairs,

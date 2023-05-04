@@ -57,7 +57,7 @@ def get_filtered_images(filters,
                         session):
 
     #no sabemos por qué el diccionari se convierte en tuple
-    filters = filters[0]
+    #filters = filters[0]
     
     im_filter_values = filter_values[:len(filters['image'])]
     fi_filter_values = filter_values[len(filters['image']):len(filters['image'])+len(filters['face_image'])]
