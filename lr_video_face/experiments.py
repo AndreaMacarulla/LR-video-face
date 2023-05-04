@@ -42,16 +42,18 @@ class Experiment:
         calibrator: BaseEstimator,
         calibration_db: List[str],
         enfsi_years: List[int],
-        filters,
+        
         # image_filters: List[str],        
         # face_image_filters: List[str],
         # quality_filters: List[str],
+        filters,
         metrics: str,
         n_calibration_pairs: int,
         embedding_model_as_scorer: bool,
         root_output_dir: str,
         session,
         quality_dropout
+        
         ):    
     
 
@@ -216,7 +218,7 @@ class ExperimentalSetup:
         # self.image_filters = image_filters
         # self.face_image_filters = face_image_filters
         # self.quality_filters = quality_filters 
-        self.filters = filters,
+        self.filters = filters
         self.metrics = metrics
         self.n_calibration_pairs = n_calibration_pairs
         self.embedding_model_as_scorer = embedding_model_as_scorer
@@ -253,7 +255,7 @@ class ExperimentalSetup:
     def _get_directory(self):
         #filters = self.image_filters + self.face_image_filters # + self.quality_filters
         
-        filterlist = list(chain.from_iterable(self.filters[0].values()))
+        filterlist = list(chain.from_iterable(self.filters.values()))
 
         subfolder = f'[{",".join(filterlist)}]'
         folder = f'C_({self.n_calibration_pairs})_[{",".join(self.calibration_db)}]_T_[{",".join([str(year) for year in self.enfsi_years])}]'
@@ -330,7 +332,7 @@ class ExperimentalSetup:
                             self.embedding_model_as_scorer,
                             self.output_dir,
                             self.session,
-                            self.quality_dropout
+                            self.quality_dropout                            
                     ))
 
         return experiments
