@@ -9,7 +9,6 @@ from typing import List, Iterator, Dict, Union, Tuple, Optional
 import lir
 import numpy as np
 import pandas as pd
-from itertools import chain
 import seaborn as sns
 from matplotlib import pyplot as plt
 
@@ -177,11 +176,8 @@ class GlobalEvaluator:
     def make_global_plot(self):
         experiment_df = pd.DataFrame(
             columns=['Year', 'Filters', 'Detector', 'Embedding Model', 'Calibrator', 'Cllr'])
-        
-        filters_list = list(chain.from_iterable(self.experiments.filters.values()))
-        #filters = self.experiments.image_filters + self.experiments.face_image_filters
-
-        str_filters = ",".join(filters_list)
+        filters = self.experiments.image_filters + self.experiments.face_image_filters
+        str_filters = ",".join(filters)
         for evaluator in self.experiment_evaluators:
 
             if isinstance(evaluator.experiment.calibrator, lir.IsotonicCalibrator):
@@ -268,6 +264,6 @@ class GlobalEvaluator:
 
             savefig = os.path.join(self.experiments.output_dir, f"cllr_summary_methods{self.experiments.embedding_model_as_scorer}")
             plt.savefig(savefig, dpi= 600)
-            plt.close()               
-      
+            plt.close()                
+
 
