@@ -417,10 +417,6 @@ def subplot_new(ax1,results:Dict, cllr_expert):
     cllr_avg = metrics.cllr(np.asarray(lr_avg), np.asarray(y_avg)) 
 
     #get cllr per dropout
-
-    
-
-
     df_plot1 = pd.DataFrame()
     for d in set(dropouts):
         lr_d = [lr for lr,dropout in zip(lrs_predicted,dropouts) if dropout== d ]
@@ -429,7 +425,7 @@ def subplot_new(ax1,results:Dict, cllr_expert):
 
         cllr_d1,cllr_d2 = cllr_new(np.asarray(lr_d), np.asarray(y_d))
         
-        print(cllr_d1,np.percentile(cllr_d2,[25,50,75]))
+        #print(cllr_d1,np.percentile(cllr_d2,[25,50,75]))
 
         #solo cambio en el momento de plotear
         df_plot1 = df_plot1.append({'dropout': round(100*(1-d)), 'Cllr': cllr_d1,'Cllr2': cllr_d2},ignore_index = True)
@@ -480,9 +476,7 @@ def subplot_new(ax1,results:Dict, cllr_expert):
     
 
 
-    ax1.tick_params(axis ='x', labelcolor = color,size = 16)
-   
-    
+    ax1.tick_params(axis ='x', labelcolor = color,size = 16)    
 
     #ax1.set(xscale="log")
 

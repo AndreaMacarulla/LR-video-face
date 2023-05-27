@@ -12,6 +12,7 @@ from typing import List, Union
 from collections import defaultdict
 from itertools import combinations, product, islice
 from lir import CalibratedScorer
+from random import choices
 
 
 
@@ -42,6 +43,11 @@ def make_cal_face_pairs(first_list_of_face_images: List[Union[FaceImage, str]],
     # todo: add shuffle.
     # ChatGPT solution: iterador = random.sample(mi_generador(), k=10). Cuidado con number_of_pairs = None.
     # todo: make dif pairs with same person first as same identity pairs.
+    
+    #if number_of_pairs:
+    #    all_cal_face_pairs_same_identity = choices(list(islice(all_pairs_same_identity, number_of_pairs)), k=number_of_pairs)
+    #    all_cal_face_pairs_dif_identity = choices(list(islice(all_pairs_dif_identity, number_of_pairs)), k=number_of_pairs)
+
     all_cal_face_pairs_same_identity = list(islice(all_pairs_same_identity, number_of_pairs))
     all_cal_face_pairs_dif_identity = list(islice(all_pairs_dif_identity, number_of_pairs))
 
