@@ -1,0 +1,121 @@
+[
+  {
+    "objectID": "experiments.html",
+    "href": "experiments.html",
+    "title": "experiments",
+    "section": "",
+    "text": "One single expleriment defined\n\nsource\n\n\n\n Experiment (detector:str, embeddingModel:str, qualityModel:str,\n             scorer:sklearn.base.BaseEstimator,\n             calibrator:sklearn.base.BaseEstimator,\n             calibration_db:List[str], enfsi_years:List[int], filters,\n             metrics:str, n_calibration_pairs:int,\n             embedding_model_as_scorer:bool, root_output_dir:str, session,\n             quality_dropout)\n\nInitialize self. See help(type(self)) for accurate signature.\n\n\n\n\n\n\n\n\n\nType\nDetails\n\n\n\n\ndetector\nstr\n\n\n\nembeddingModel\nstr\n\n\n\nqualityModel\nstr\n\n\n\nscorer\nBaseEstimator\n\n\n\ncalibrator\nBaseEstimator\n\n\n\ncalibration_db\ntyping.List[str]\n\n\n\nenfsi_years\ntyping.List[int]\n\n\n\nfilters\n\nimage_filters: List[str], face_image_filters: List[str],quality_filters: List[str],\n\n\nmetrics\nstr\n\n\n\nn_calibration_pairs\nint\n\n\n\nembedding_model_as_scorer\nbool\n\n\n\nroot_output_dir\nstr\n\n\n\nsession\n\n\n\n\nquality_dropout"
+  },
+  {
+    "objectID": "experiments.html#experiment",
+    "href": "experiments.html#experiment",
+    "title": "experiments",
+    "section": "",
+    "text": "One single expleriment defined\n\nsource\n\n\n\n Experiment (detector:str, embeddingModel:str, qualityModel:str,\n             scorer:sklearn.base.BaseEstimator,\n             calibrator:sklearn.base.BaseEstimator,\n             calibration_db:List[str], enfsi_years:List[int], filters,\n             metrics:str, n_calibration_pairs:int,\n             embedding_model_as_scorer:bool, root_output_dir:str, session,\n             quality_dropout)\n\nInitialize self. See help(type(self)) for accurate signature.\n\n\n\n\n\n\n\n\n\nType\nDetails\n\n\n\n\ndetector\nstr\n\n\n\nembeddingModel\nstr\n\n\n\nqualityModel\nstr\n\n\n\nscorer\nBaseEstimator\n\n\n\ncalibrator\nBaseEstimator\n\n\n\ncalibration_db\ntyping.List[str]\n\n\n\nenfsi_years\ntyping.List[int]\n\n\n\nfilters\n\nimage_filters: List[str], face_image_filters: List[str],quality_filters: List[str],\n\n\nmetrics\nstr\n\n\n\nn_calibration_pairs\nint\n\n\n\nembedding_model_as_scorer\nbool\n\n\n\nroot_output_dir\nstr\n\n\n\nsession\n\n\n\n\nquality_dropout"
+  },
+  {
+    "objectID": "experiments.html#experimental-setup",
+    "href": "experiments.html#experimental-setup",
+    "title": "experiments",
+    "section": "Experimental Setup",
+    "text": "Experimental Setup\nThe set of all experiments for one scenario.\n\nsource\n\nExperimentalSetup\n\n ExperimentalSetup (detectors, embeddingModels, qualityModels,\n                    calibrator_names, calibration_db, enfsi_years,\n                    filters, metrics, n_calibration_pairs,\n                    embedding_model_as_scorer, results_folder:str,\n                    session, quality_dropout=[1],\n                    name:datetime.datetime='2023-09-01 13 49 12')\n\nInitialize self. See help(type(self)) for accurate signature."
+  },
+  {
+    "objectID": "core.html",
+    "href": "core.html",
+    "title": "core",
+    "section": "",
+    "text": "source\n\nfoo2\n\n foo2 ()\n\n\nsource\n\n\nfoo\n\n foo ()"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "lr-video-face",
+    "section": "",
+    "text": "This file will become your README and also the index of your documentation."
+  },
+  {
+    "objectID": "index.html#install",
+    "href": "index.html#install",
+    "title": "lr-video-face",
+    "section": "Install",
+    "text": "Install\npip install lr_video_face"
+  },
+  {
+    "objectID": "index.html#how-to-use",
+    "href": "index.html#how-to-use",
+    "title": "lr-video-face",
+    "section": "How to use",
+    "text": "How to use\nFill me in please! Don’t forget code examples:\n\n1+1\n\n2"
+  },
+  {
+    "objectID": "calibration.html",
+    "href": "calibration.html",
+    "title": "calibration",
+    "section": "",
+    "text": "Sorted by category.\n\nsource\n\n\n\n make_cal_face_pairs\n                      (first_list_of_face_images:List[Union[sql_face.table\n                      s.FaceImage,str]], second_list_of_face_images:List[U\n                      nion[sql_face.tables.FaceImage,str]]=None,\n                      number_of_pairs:int=None)\n\nlist of face images with their identities Image.identity.\n\nsource\n\n\n\n\n get_filtered_images (filters, filter_values:tuple, detector,\n                      embeddingModel, qualityModel, calibration_db,\n                      session)\n\n\nsource\n\n\n\n\n get_calibration_pairs_per_category (categories, filters, detector,\n                                     embeddingModel, qualityModel,\n                                     calibration_db, n_calibration_pairs,\n                                     session)\n\n\n\n\n\n\n\n\n\nDetails\n\n\n\n\ncategories\n\n\n\nfilters\nnewimage_filters, face_image_filters, quality_filters,\n\n\ndetector\n\n\n\nembeddingModel\n\n\n\nqualityModel\n\n\n\ncalibration_db\n\n\n\nn_calibration_pairs\n\n\n\nsession"
+  },
+  {
+    "objectID": "calibration.html#calibration-pairs",
+    "href": "calibration.html#calibration-pairs",
+    "title": "calibration",
+    "section": "",
+    "text": "Sorted by category.\n\nsource\n\n\n\n make_cal_face_pairs\n                      (first_list_of_face_images:List[Union[sql_face.table\n                      s.FaceImage,str]], second_list_of_face_images:List[U\n                      nion[sql_face.tables.FaceImage,str]]=None,\n                      number_of_pairs:int=None)\n\nlist of face images with their identities Image.identity.\n\nsource\n\n\n\n\n get_filtered_images (filters, filter_values:tuple, detector,\n                      embeddingModel, qualityModel, calibration_db,\n                      session)\n\n\nsource\n\n\n\n\n get_calibration_pairs_per_category (categories, filters, detector,\n                                     embeddingModel, qualityModel,\n                                     calibration_db, n_calibration_pairs,\n                                     session)\n\n\n\n\n\n\n\n\n\nDetails\n\n\n\n\ncategories\n\n\n\nfilters\nnewimage_filters, face_image_filters, quality_filters,\n\n\ndetector\n\n\n\nembeddingModel\n\n\n\nqualityModel\n\n\n\ncalibration_db\n\n\n\nn_calibration_pairs\n\n\n\nsession"
+  },
+  {
+    "objectID": "calibration.html#lr-systems",
+    "href": "calibration.html#lr-systems",
+    "title": "calibration",
+    "section": "LR systems",
+    "text": "LR systems\nCalibration per category\n\nsource\n\ngenerate_lr_systems\n\n generate_lr_systems (embeddingModel, embedding_model_as_scorer, metrics,\n                      scorer, calibrator, calibration_pairs_per_category,\n                      test_pairs_per_category, session)\n\n\nsource\n\n\npredict_lr\n\n predict_lr (enfsi_years, embeddingModel, embedding_model_as_scorer,\n             metrics, lr_systems, test_pairs_per_category, df_pairs_2015,\n             session)"
+  },
+  {
+    "objectID": "plots.html",
+    "href": "plots.html",
+    "title": "plots",
+    "section": "",
+    "text": "image-to-image\n\nsource\n\n\n\n plot_lr_distributions (results:Dict, experiment_directory,\n                        save_plots:bool=True, show:Optional[bool]=False)\n\nPlots the 10log LRs generated for the two hypotheses by the fitted system.\n\nsource\n\n\n\n\n plot_ROC_curve (results:Dict, experiment_directory, save_plots:bool=True,\n                 show:Optional[bool]=False)\n\n\nsource\n\n\n\n\n plot_tippett (results:Dict, experiment_directory, save_plots:bool=True,\n               show:Optional[bool]=False)\n\nPlots the 10log LRs in a Tippett plot.\n\nsource\n\n\n\n\n plot_cllr (results:Dict, experiment_directory, enfsi_years:List[int],\n            cllr_expert_per_year:Dict, cllr_auto_per_year:Dict,\n            embeddingModel, save_plots:bool=True,\n            show:Optional[bool]=False)\n\nPlots cllr value for ENFSI tests. It computes both cllr of automated systems with the cllrs from experts. If there is no ENFSI data, this graph does not show."
+  },
+  {
+    "objectID": "plots.html#ensi-all-years",
+    "href": "plots.html#ensi-all-years",
+    "title": "plots",
+    "section": "",
+    "text": "image-to-image\n\nsource\n\n\n\n plot_lr_distributions (results:Dict, experiment_directory,\n                        save_plots:bool=True, show:Optional[bool]=False)\n\nPlots the 10log LRs generated for the two hypotheses by the fitted system.\n\nsource\n\n\n\n\n plot_ROC_curve (results:Dict, experiment_directory, save_plots:bool=True,\n                 show:Optional[bool]=False)\n\n\nsource\n\n\n\n\n plot_tippett (results:Dict, experiment_directory, save_plots:bool=True,\n               show:Optional[bool]=False)\n\nPlots the 10log LRs in a Tippett plot.\n\nsource\n\n\n\n\n plot_cllr (results:Dict, experiment_directory, enfsi_years:List[int],\n            cllr_expert_per_year:Dict, cllr_auto_per_year:Dict,\n            embeddingModel, save_plots:bool=True,\n            show:Optional[bool]=False)\n\nPlots cllr value for ENFSI tests. It computes both cllr of automated systems with the cllrs from experts. If there is no ENFSI data, this graph does not show."
+  },
+  {
+    "objectID": "plots.html#enfsi-2015",
+    "href": "plots.html#enfsi-2015",
+    "title": "plots",
+    "section": "Enfsi 2015",
+    "text": "Enfsi 2015\nimage-to-video\n\nsource\n\nplot_cllr_per_common_attributes\n\n plot_cllr_per_common_attributes (results:Dict, cllr_expert_per_year,\n                                  experiment_directory,\n                                  save_plots:bool=True,\n                                  show:Optional[bool]=False)\n\n\nsource\n\n\nplot_cllr_per_qualitydrop\n\n plot_cllr_per_qualitydrop (cllrs_2015:Dict[float,float],\n                            cllr_expert_per_year, experiment_directory,\n                            save_plots:bool=True,\n                            show:Optional[bool]=False)\n\n\nsource\n\n\nplot_new\n\n plot_new (results:Dict, cllr_expert_per_year, experiment_directory,\n           save_plots:bool=True, show:Optional[bool]=False)\n\nNew Cllr function which returns Cllr and the terms which compose it.\n\nsource\n\n\ncllr_new\n\n cllr_new (lrs, y, weights=(1, 1))\n\nCalculates a log likelihood ratio cost (C_llr) for a series of likelihood ratios.\nNico Brümmer and Johan du Preez, Application-independent evaluation of speaker detection, In: Computer Speech and Language 20(2-3), 2006.\n\n\n\n\nType\nDefault\nDetails\n\n\n\n\nlrs\na numpy array of LRs\n\n\n\n\ny\na numpy array of labels (0 or 1)\n\n\n\n\nweights\ntuple\n(1, 1)\n\n\n\nReturns\ncllr\n\nthe log likelihood ratio cost\n\n\n\nSubplot\n\nsource\n\n\nsubplot_new\n\n subplot_new (ax1, results:Dict, cllr_expert)"
+  },
+  {
+    "objectID": "orm.html",
+    "href": "orm.html",
+    "title": "orm",
+    "section": "",
+    "text": "source\n\nFacePair\n\n FacePair (first:sql_face.tables.FaceImage,\n           second:sql_face.tables.FaceImage, same_identity:bool)\n\nInitialize self. See help(type(self)) for accurate signature.\n\nsource\n\n\nScorerModel\n\n ScorerModel (embeddingModel:str, metric:str)\n\nInitialize self. See help(type(self)) for accurate signature."
+  },
+  {
+    "objectID": "pairing.html",
+    "href": "pairing.html",
+    "title": "Pairing",
+    "section": "",
+    "text": "source\n\n\n\n get_test_pairs (enfsi_years, session)\n\n\nsource\n\n\n\n\n get_valid_test_pairs_2015 (session, detector, embeddingModel,\n                            qualityModel, quality_dropouts)\n\n\nsource\n\n\n\n\n get_valid_test_pairs (session, detector, embeddingModel, enfsi_years)\n\n\nsource\n\n\n\n\n get_test_pairs_per_category (session, filters, detector, embeddingModel,\n                              qualityModel, enfsi_years, quality_dropout)\n\n\n\n\n\nDetails\n\n\n\n\nsession\n\n\n\nfilters\nnewimage_filters,face_image_filters,\n\n\ndetector\n\n\n\nembeddingModel\n\n\n\nqualityModel\n\n\n\nenfsi_years\n\n\n\nquality_dropout"
+  },
+  {
+    "objectID": "pairing.html#test-pairs",
+    "href": "pairing.html#test-pairs",
+    "title": "Pairing",
+    "section": "",
+    "text": "source\n\n\n\n get_test_pairs (enfsi_years, session)\n\n\nsource\n\n\n\n\n get_valid_test_pairs_2015 (session, detector, embeddingModel,\n                            qualityModel, quality_dropouts)\n\n\nsource\n\n\n\n\n get_valid_test_pairs (session, detector, embeddingModel, enfsi_years)\n\n\nsource\n\n\n\n\n get_test_pairs_per_category (session, filters, detector, embeddingModel,\n                              qualityModel, enfsi_years, quality_dropout)\n\n\n\n\n\nDetails\n\n\n\n\nsession\n\n\n\nfilters\nnewimage_filters,face_image_filters,\n\n\ndetector\n\n\n\nembeddingModel\n\n\n\nqualityModel\n\n\n\nenfsi_years\n\n\n\nquality_dropout"
+  },
+  {
+    "objectID": "evaluators.html",
+    "href": "evaluators.html",
+    "title": "evaluators",
+    "section": "",
+    "text": "source\n\nExperimentEvaluator\n\n ExperimentEvaluator (experiment:lr_video_face.experiments.Experiment,\n                      cllr_expert_per_year:Dict[int,list],\n                      results:Dict[str,list], save_plots:bool=True)\n\nInitialize self. See help(type(self)) for accurate signature.\n\nsource\n\n\nGlobalEvaluator\n\n GlobalEvaluator (experiments:lr_video_face.experiments.ExperimentalSetup,\n                  save_plots:bool=True)\n\nInitialize self. See help(type(self)) for accurate signature."
+  }
+]
